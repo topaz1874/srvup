@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="jumbotron">
+<div class="container-fluid">
+
+<h2>{{ object.title }}</h4>
+
+{% if object.description %}
+
+<p class="panel-body">{{ object.description }}</p>
+
+{% endif %}
+</div>
+</div>
+<ul class="list-group">
+{% for video in object.video_set.all %}
+
+<li class="list-group-item"><a href="{{ video.get_absolute_url }}">{{ video.title }}</a>
+<br/>
+</li>
+{% endfor %}
+</ul>
+
+
+{% endblock %}

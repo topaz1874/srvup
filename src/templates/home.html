@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Welcome | {% endblock %}
+
+
+{% block content %}
+<div class="container">
+
+    {% for video in videos %}
+    <div class="row">
+
+        <div class="col-sm-6">
+            <a href="{{ video.get_absolute_url }}">
+                <h4>{{ video.title }}</h4> 
+            </a>
+            <div  class="embed-responsive embed-responsive-16by9">
+                  {{video.embed_code|safe}} 
+            </div>
+        </div>
+    </div>
+
+    {% endfor %}
+
+
+<br/>
+<br/>
+
+<h1>Embeds</h1>
+{% for embed in the_embeds %}
+{{ embed|safe }}
+{% endfor %}
+
+</div>
+
+{% endblock %}
+
+
+<style>
+{% block style %}
+h1 {
+    color: red;
+}
+
+.container{
+
+  background: #e3e3e3;
+}
+
+{% endblock %}
+</style>

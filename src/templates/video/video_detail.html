@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h3>{{object.title}}</h3>
+
+{{ object.embed_code|safe }}
+
+<br/>
+<p>If you like this video share with your friends </p>
+
+<a target="_blank" href="https://www.facebook.com/sharer/sharer.php?u={{ object.get_full_url }}"><i class="fa fa-facebook-square fa-3x"></i></a>
+
+<a target='_blank' href="https://twitter.com/home?status={{ object.get_share_message|safe }}">
+<i class="fa fa-twitter fa-3x" aria-hidden="true"></i>
+</a>
+
+{% endblock %}
