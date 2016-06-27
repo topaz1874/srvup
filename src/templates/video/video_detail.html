@@ -1,11 +1,41 @@
 {% extends 'base.html' %}
 
+<script>
+{% block jquery %}
+
+
+function window_resize (){
+    var parent_id = $('iframe').parent().attr('id');
+
+    if (parent_id == 'main_vid'){
+        var parent_width = $('iframe').parent().width();
+        var width = $('iframe').css('width');
+        var height = $('iframe').css('height');
+        var ratio = parseInt(height)/parseInt(width);
+        $('iframe').css('width', parent_width);
+        $('iframe').css('height', parseInt(parent_width)*ratio);
+        // console.log(ratio);
+        // console.log(parent_width);
+    };
+
+
+};
+
+window_resize();
+$(window).bind("resize", function(){
+    //alert("resize");
+    window_resize();
+});
+{% endblock %}
+</script>
+
+
 {% block content %}
 
 <h3>{{object.title}}</h3>
-
+<div class="col-sm-10" id="main_vid">
 {{ object.embed_code|safe }}
-
+</div>
 <br/>
 <p>If you like this video share with your friends </p>
 

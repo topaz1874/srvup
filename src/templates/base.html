@@ -57,6 +57,12 @@
     </div> <!-- /container -->
 
     {% include 'javascript.html' %}
+    <script type="text/javascript">
+      $(document).ready(function(){
+        {% block jquery %}
+        {% endblock %}
+      });
+    </script>
 
 
   </body>
