@@ -30,6 +30,7 @@ MY_DOMAINS = 'http://topaz1874.pythonanywhere.com'
 
 LOGIN_URL = '/login/'
 # Application definition
+AUTH_USER_MODEL = 'account.MyUser'
 
 INSTALLED_APPS = (
     'django.contrib.admin',
@@ -39,6 +40,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'video',
+    'account',
 )
 
 MIDDLEWARE_CLASSES = (

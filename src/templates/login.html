@@ -7,6 +7,10 @@
 
 {{form.as_p}}
 
+   {% if login_error %}
+    <p class="text-danger">{{ login_error }}</p>
+    {% endif %}
+
 <input type="submit" class="btn btn-default" name="submit"/>
 
 </form>
