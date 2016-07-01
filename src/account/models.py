@@ -7,8 +7,8 @@ from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
 class MyUserManager(BaseUserManager):
     def create_user(self, email=None, username=None, password=None):
         """
-        Creates and saves a User with the given email, date of
-        birth and password.
+        Creates and saves a User with the given email, username
+        and password.
         """
         if not username:
             raise ValueError("Username must be included")

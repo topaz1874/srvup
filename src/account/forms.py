@@ -23,6 +23,14 @@ class UserCreationForm(forms.ModelForm):
             raise forms.ValidationError("Passwords don't match")
         return password2
 
+    def clean_username(self):
+        username = self.cleaned_data['username']
+        try:
+            MyUser.objects.get(username=username)
+            raise forms.ValidationError('This username has already been used')
+        except Exception:
+             
+            return username
     def save(self, commit=True):
         # Save the provided password in hashed format
         user = super(UserCreationForm, self).save(commit=False)
