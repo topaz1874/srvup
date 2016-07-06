@@ -39,7 +39,7 @@ def comment_create_view(request):
             # create child comment
             if parent is not None and parent.video is not None:
                 video = parent.video
-                new_comment = Comment.objects.create_comment(
+                Comment.objects.create_comment(
                     text=text,
                     video=video,
                     parent=parent,
@@ -47,20 +47,24 @@ def comment_create_view(request):
                     path=parent.get_origin)
                 # print parent.get_origin # video url
                 # print new_comment.get_origin #  video url 
-                # print parent.get_absolute_url() parent comment thread 
+                # print parent.get_absolute_url() parent  comment thread 
                 # new_comment.get_absolute_url() new comment threads 
+
                 # return to parent comment thread
+                messages.success(request, "Thanks for your response.")
                 return HttpResponseRedirect(parent.get_absolute_url())
 
             # create parent comment 
             else:
-                new_comment = Comment.objects.create_comment(
+                Comment.objects.create_comment(
                     text=text,
                     video=video,
                     author=request.user,
-                    path=origin_path)
-                return HttpResponseRedirect(new_comment.get_absolute_url())
+                    path=origin_path)            
+                messages.success(request, "Thanks for your comment.")
+                return HttpResponseRedirect(video.get_absolute_url())
         else:
+
             messages.warning(request, "Hey man you should enter somethin.")
             return HttpResponseRedirect(origin_path)
 
