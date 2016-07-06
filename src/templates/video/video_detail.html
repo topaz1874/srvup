@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-<script>
+<script type="text/javascript">
 {% block jquery %}
 
 
@@ -26,6 +26,20 @@ $(window).bind("resize", function(){
     //alert("resize");
     window_resize();
 });
+
+
+
+$('.reply_link').click(function(e){
+    e.preventDefault();
+    var reply_comment = $(this).next().next('.reply_comment')
+    if (reply_comment.length){ 
+        reply_comment.fadeToggle("slow");
+        // console.log(reply_comment.length);
+    };
+
+});
+
+
 {% endblock %}
 </script>
 
@@ -50,27 +64,40 @@ $(window).bind("resize", function(){
 <hr/>
 <div class="row">
   <div class="col-sm-12">
-      <form method="post">{% csrf_token %}
+      <form method="post" action="{% url 'comment_create' %}">{% csrf_token %}
           {{ comment_form.as_p }}
-      <input class="btn btn-primary" type="submit" value="comment">
+      <input type="hidden" name="video_id" value="{{ object.id }}"/>
+      <input type="hidden" name="origin_path" value="{{ object.get_absolute_url }}">
+      <input class="btn btn-primary" type="submit" value="comment"/>
       </form>
   </div>
   <div class="col-sm-12">
     <h3>Comments and questions</h3>
     <table class="table">
-    {% for comment in comments %}
+    {% for comment in comments %} {% comment %} this is parent comment {% endcomment %}
     <tr><td>{{ comment.get_comment }} 
     <small> via {{ comment.author }} | {{ comment.timestamp | timesince }} ago </small>
         {% if not comment.is_child %}
-            <li>
+            <ul>
             {% for child in  comment.get_children %}
-
-            <ul> {{ child.get_comment }}
+            <li>{{ child.get_comment }}
             <small> via {{ child.author }} | {{ child.timestamp | timesince }} ago </small>
-            </ul>
-            {% endfor %}
             </li>
+            {% endfor %}
+            </ul>
+            
+        <a href="#" class="reply_link">Reply</a> | <a href="{{ comment.get_absolute_url }}" class="view_thread">View Thread</a> 
+        <div class="reply_comment" style="display:none;">
+            <form method="POST" action="{% url 'comment_create' %}">{% csrf_token %}
+            {{ comment_form.as_p }}
+            <input type="hidden" name="parent_id" value="{{comment.id}}" />
+            <input type="hidden" name="video_id" value="{{comment.video.id}}"/>
+            <input type="hidden" name="origin_path" value="{{comment.get_origin }}"/>
+            <input class="btn btn-default" type="submit" value="reply" />
+            </form>
+        </div>
         {% endif %}    
+
     </td></tr>
 
     {% endfor %}

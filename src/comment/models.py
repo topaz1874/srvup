@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.urlresolvers import reverse
 
 from account.models import MyUser
 from video.models import Video
@@ -14,7 +15,7 @@ class CommentManager(models.Manager):
     def all(self):
         return self.get_queryset().all()
 
-    def create_comment(self, text=None, author=None, video=None, path=None):
+    def create_comment(self, text=None, author=None, video=None, path=None, parent=None):
         if not path:
             raise ValueError("must include a path when adding comment")
         if not author:
@@ -26,6 +27,8 @@ class CommentManager(models.Manager):
             path=path)
         if video is not None:
             comment.video=video
+        if parent is not None:
+            comment.parent=parent
         comment.save(using=self._db)
         return comment
 
@@ -62,7 +65,12 @@ class Comment(models.Model):
         else:
             return Comment.objects.filter(parent=self)
 
+    @property
+    def get_origin(self):
+        return self.path
 
+    def get_absolute_url(self):
+        return reverse('comment_thread', kwargs={'pk':self.id})
 
 
 

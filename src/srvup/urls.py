@@ -20,6 +20,9 @@ urlpatterns = patterns('',
         'video.views.category_detail', name='category_detail'),
     url(r'^projects/(?P<cat_slug>[-\w]+)/(?P<vid_slug>[-\w]+)/$',
         'video.views.video_detail', name='video_detail'),
+    url(r'^comment/(?P<pk>\d+)/$', 
+        'comment.views.comment_thread', name='comment_thread'),
+    url(r'^comment/create/$', 'comment.views.comment_create_view', name='comment_create'),
 
     # url(r'^blog/', include('blog.urls')),
 
