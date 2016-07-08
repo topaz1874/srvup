@@ -40,8 +40,8 @@ class Comment(models.Model):
     parent = models.ForeignKey('self', null=True, blank=True)
     video = models.ForeignKey(Video, null=True, blank=True)
     path = models.CharField(max_length=512)
-    timestamp = models.DateField(auto_now=False,auto_now_add=True)
-    updated = models.DateField(auto_now=True,auto_now_add=False)
+    timestamp = models.DateTimeField(auto_now=False,auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True,auto_now_add=False)
     active = models.BooleanField(default=True)
 
     objects = CommentManager()

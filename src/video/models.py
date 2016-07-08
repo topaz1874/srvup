@@ -109,6 +109,22 @@ class Category(models.Model):
     def get_absolute_url(self):
         return reverse('category_detail', kwargs={'cat_slug': self.slug })
 
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
+
+TAG_CHOICES = (
+    ('django','django'),
+    ('python','python'),
+    ('pycon', 'pycon'),)
+
+class TaggedItem(models.Model):
+    tag = models.SlugField(choices=TAG_CHOICES)
+    content_type = models.ForeignKey(ContentType)
+    object_id = models.PositiveIntegerField()
+    content_object = GenericForeignKey()
+
+    def __unicode__(self):
+        return self.tag
 
 
 

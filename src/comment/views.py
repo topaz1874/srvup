@@ -3,6 +3,7 @@ from django.http import HttpResponseRedirect, Http404
 from django.contrib import messages
 
 from video.models import Video
+from notification.signals import notify
 from .forms import CommentForm
 from .models import Comment
 
@@ -51,6 +52,7 @@ def comment_create_view(request):
                 # new_comment.get_absolute_url() new comment threads 
 
                 # return to parent comment thread
+                notify.send(sender=request.user, recipient=parent.author, action='new response')
                 messages.success(request, "Thanks for your response.")
                 return HttpResponseRedirect(parent.get_absolute_url())
 
@@ -61,6 +63,7 @@ def comment_create_view(request):
                     video=video,
                     author=request.user,
                     path=origin_path)            
+                notify.send(sender=request.user, recipient=parent.author, action='new comment')                
                 messages.success(request, "Thanks for your comment.")
                 return HttpResponseRedirect(video.get_absolute_url())
         else:

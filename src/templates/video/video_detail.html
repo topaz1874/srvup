@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load humanize %}
 {% load crispy_forms_tags %}
 <script type="text/javascript">
 {% block jquery %}
@@ -60,7 +61,7 @@ $('.reply_link').click(function(e){
 <i class="fa fa-twitter fa-3x" aria-hidden="true"></i>
 </a>
 
-<br/>
+
 <hr/>
 <div class="row">
   <div class="col-sm-12">
@@ -75,12 +76,12 @@ $('.reply_link').click(function(e){
     <table class="table">
     {% for comment in comments %} {% comment %} this is parent comment {% endcomment %}
     <tr><td>{{ comment.get_comment }} 
-    <small> via {{ comment.author }} | {{ comment.timestamp | timesince }} ago </small>
+    <small> via {{ comment.author }} | {{ comment.timestamp|naturaltime  }} ago </small>
         {% if not comment.is_child %}
             <ul>
             {% for child in  comment.get_children %}
             <li>{{ child.get_comment }}
-            <small> via {{ child.author }} | {{ child.timestamp | timesince }} ago </small>
+            <small> via {{ child.author }} | {{ child.timestamp|naturaltime }} ago </small>
             </li>
             {% endfor %}
             </ul>
