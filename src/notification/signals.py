@@ -1,3 +1,3 @@
 from django.dispatch import Signal
 
-notify = Signal(providing_args=['recipient', 'action'])
+notify = Signal(providing_args=['recipient', 'verb', 'target', 'action'])

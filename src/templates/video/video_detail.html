@@ -51,6 +51,16 @@ $('.reply_link').click(function(e){
 <div class="col-sm-10" id="main_vid">
 {{ object.embed_code|safe }}
 </div>
+
+{% if object.tags.all %}
+<div class="col-sm-12">
+    <ul>
+    {% for tag in object.tags.all %}
+    <li>{{ tag }}</li>
+    {% endfor %}
+    </ul>
+</div>
+{% endif %}
 <br/>
 
 <p>If you like this video share with your friends </p>

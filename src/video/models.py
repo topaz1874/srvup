@@ -1,5 +1,6 @@
 import urllib2
 from django.conf import settings
+from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -31,6 +32,7 @@ class Video(models.Model):
     title = models.CharField(max_length=256)
     share_message = models.TextField(default=DEFAULT_MESSAGE, null=True, blank=True)
     slug = models.SlugField(null=True, blank=True, max_length=256)
+    tags = GenericRelation("TaggedItem", null=True, blank=True)
     thumbnail = models.ImageField(upload_to='uploads/%Y/%m/%d',null=True,blank=True)
     upload_vid = models.FileField(upload_to='uploads/%Y/%m/%d',null=True, blank=True)
     embed_code = models.CharField(max_length=500,null=True, blank=True)
@@ -93,6 +95,7 @@ class Category(models.Model):
     description = models.TextField(max_length=5000, null=True, blank=True)
     image = models.ImageField(upload_to='images/', null=True, blank=True)
     slug = models.SlugField(blank=True, unique=True)
+    tags = GenericRelation("TaggedItem", null=True, blank=True)
     timestamp = models.DateTimeField(auto_now_add=True, auto_now=False)
     updated = models.DateField(auto_now_add=False, auto_now=True)
     active = models.BooleanField(default=True)
@@ -115,7 +118,11 @@ from django.contrib.contenttypes.models import ContentType
 TAG_CHOICES = (
     ('django','django'),
     ('python','python'),
-    ('pycon', 'pycon'),)
+    ('pycon', 'pycon'),
+    ('css', 'css'),
+    ('bootstrap','bootstrap'),
+    ('content_types','content_types'),
+    )
 
 class TaggedItem(models.Model):
     tag = models.SlugField(choices=TAG_CHOICES)

@@ -40,7 +40,7 @@ def comment_create_view(request):
             # create child comment
             if parent is not None and parent.video is not None:
                 video = parent.video
-                Comment.objects.create_comment(
+                new_comment = Comment.objects.create_comment(
                     text=text,
                     video=video,
                     parent=parent,
@@ -51,19 +51,33 @@ def comment_create_view(request):
                 # print parent.get_absolute_url() parent  comment thread 
                 # new_comment.get_absolute_url() new comment threads 
 
-                # return to parent comment thread
-                notify.send(sender=request.user, recipient=parent.author, action='new response')
+                # create a signal that parent comment user receive response
+                notify.send(
+                    sender=request.user, 
+                    recipient=parent.author, 
+                    verb='new response',
+                    action=new_comment,
+                    target=parent,
+                    )
+
                 messages.success(request, "Thanks for your response.")
                 return HttpResponseRedirect(parent.get_absolute_url())
 
             # create parent comment 
             else:
-                Comment.objects.create_comment(
+                new_comment = Comment.objects.create_comment(
                     text=text,
                     video=video,
                     author=request.user,
-                    path=origin_path)            
-                notify.send(sender=request.user, recipient=parent.author, action='new comment')                
+                    path=origin_path)        
+                # create a signal sending new comment add notification
+                notify.send(
+                    sender=request.user, 
+                    recipient=new_comment.author, 
+                    verb='new comment created',
+                    action=new_comment,
+                    target=new_comment.video,
+                    )                
                 messages.success(request, "Thanks for your comment.")
                 return HttpResponseRedirect(video.get_absolute_url())
         else:

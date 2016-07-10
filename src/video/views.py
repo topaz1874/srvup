@@ -13,9 +13,9 @@ def video_detail(request,cat_slug,vid_slug):
         return Http404
     try:
         obj = Video.objects.get(slug=vid_slug)
-        content_type = ContentType.objects.get_for_model(obj)
-        tags = TaggedItem.objects.filter(content_type=content_type, object_id=obj.id)
-        print tags
+        # content_type = ContentType.objects.get_for_model(obj)
+        # tags = TaggedItem.objects.filter(content_type=content_type, object_id=obj.id)
+        # print tags
         comments = obj.comment_set.all()
         comment_form = CommentForm(request.POST or None)
         return render(request, 'video/video_detail.html', {
