@@ -5,6 +5,31 @@ from django.contrib.contenttypes.models import ContentType
 
 from .signals import notify
 # Create your models here.
+class NotificationQuerySet(models.query.QuerySet):
+    def get_user(self, user):
+        return self.filter(recipient=user)
+    def read(self):
+        return self.filter(read=True)
+
+    def unread(self):
+        return self.filter(unread=True)
+
+class NotificationManager(models.Manager):
+    def get_queryset(self):
+        return NotificationQuerySet(self.model, using=self._db)
+
+    def get_user(self,user):
+        return self.get_queryset().get_user(user)
+
+    def get_read(self,user):
+        return self.get_queryset().read().get_user(user)
+
+    def get_unread(self,user):
+        return self.get_queryset().unread().get_user(user)
+
+
+
+
 class Notifications(models.Model):
     sender_content_type = models.ForeignKey(ContentType, related_name='notify_sender')
     sender_object_id = models.PositiveIntegerField()
@@ -24,13 +49,27 @@ class Notifications(models.Model):
     verb = models.CharField(max_length=512)
     timestamp = models.DateTimeField(auto_now_add=True, auto_now=False)
 
+    unread = models.BooleanField(default=True)
+    read = models.BooleanField(default=False)
+
+    objects = NotificationManager()
+
     def __unicode__(self):
-        return  str(self.verb)
+        context = {
+            'sender': self.sender_object,
+            'action': self.action_object,
+            'target': self.target_object,
+            'recipient': self.recipient,
+            'verb': self.verb,
+        }
+        return  "%(recipient)s : You've got %(verb)s from %(sender)s " % context
 
 #  receiver functions
 def new_notification(sender, **kwargs):
-    # print sender
-    # print kwargs
+    """
+    This receiver function will create a new notification instance
+    with the signal sending from  comment create/reply view.
+    """
     recipient = kwargs.pop('recipient')
     verb = kwargs.pop('verb')
     # create a new notification object
@@ -47,7 +86,6 @@ def new_notification(sender, **kwargs):
             setattr(new_note, "%s_object_id" % (option), obj.id)
 
     new_note.save()
-    print new_note
 
 # connect receiver to signal
 notify.connect(new_notification)

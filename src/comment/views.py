@@ -55,7 +55,7 @@ def comment_create_view(request):
                 notify.send(
                     sender=request.user, 
                     recipient=parent.author, 
-                    verb='new response',
+                    verb='got an new response',
                     action=new_comment,
                     target=parent,
                     )
@@ -74,7 +74,7 @@ def comment_create_view(request):
                 notify.send(
                     sender=request.user, 
                     recipient=new_comment.author, 
-                    verb='new comment created',
+                    verb='posted new comment',
                     action=new_comment,
                     target=new_comment.video,
                     )                

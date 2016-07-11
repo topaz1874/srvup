@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{%  block  content%}
+
+<div class="panel panel-default">
+    <div class="panel-heading">All notificaitons</div>
+    <table class="table">
+        <tr>
+        <th>Sender</th>
+        <th>Recipient</th>
+        <th>Comment</th>
+        </tr>
+        {% for note in unread %}
+        <tr>
+        <td>{{note.sender_object}}</td>
+        <td>{{note.recipient}}</td>
+        <td>{{note}}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+{% endblock %}
