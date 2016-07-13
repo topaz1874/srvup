@@ -1,3 +1,5 @@
+import json
+from django.http import HttpResponse
 from django.shortcuts import render,Http404,HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.contrib.auth.decorators import login_required
@@ -67,3 +69,34 @@ def read(request, pk):
             return Http404
     except:
         return HttpResponseRedirect(reverse('notification_all'))
+
+@login_required
+def get_ajax(request):
+    if request.is_ajax():
+        notes = Notifications.objects.get_recent_unread(request.user)
+        note_lst  = []
+        count = notes.count()
+        for note in notes:
+            note_lst.append(str(note))
+        data = {
+            'notifications': note_lst,
+            'count': count,
+        }
+        json_data = json.dumps(data)
+        return HttpResponse(json_data, content_type='application/json')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

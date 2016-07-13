@@ -43,6 +43,9 @@ class NotificationManager(models.Manager):
     def get_unread(self,user):
         return self.get_queryset().unread().get_user(user)
 
+    def get_recent_unread(self,user):
+        return self.get_unread(user)[:3]
+
 
 
 
@@ -69,7 +72,8 @@ class Notifications(models.Model):
 
     objects = NotificationManager()
 
-
+    class Meta:
+        ordering = ['timestamp']
     def __unicode__(self):
         try:
             target_url = self.target_object.get_absolute_url()

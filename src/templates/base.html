@@ -39,6 +39,9 @@
 
   {% include 'navbar.html' %}
   
+  <div class="panel panel-default">
+    <div class="panel-body" id="display_notes"></div>
+  </div>
 {% for message in messages %}
     <div class="alert alert-dismissible alert-{{ message.tags }}">
         <button type="button" class="close" data-dismiss="alert">×</button>
@@ -68,6 +71,36 @@
         {% block jquery %}
         {% endblock %}
       });
+    </script>
+
+    <script>
+      $(document).ready(function(){
+        $('.notification-toggle').click(function(e){
+          e.preventDefault();
+          $.ajax({
+            type:"POST",
+            url:"{% url 'notification_ajax' %}",
+            data:{
+              csrfmiddlewaretoken: "{{ csrf_token }}",
+            },
+            success:function(data){
+              console.log(data.notifications);
+              var count = data.count;
+              console.log(count);
+              $('#display_notes').html('');
+              $(data.notifications).each(function(){
+                $('#display_notes').append(this + '<br/>');
+              });
+              },
+            error:function(rs,e){
+              console.log(rs);
+              console.log(e);
+            }
+            
+          });
+
+        })
+      })
     </script>
 
 
