@@ -2,23 +2,39 @@ from django.db import models
 from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
+from django.core.urlresolvers import reverse
 
 from .signals import notify
 # Create your models here.
 class NotificationQuerySet(models.query.QuerySet):
     def get_user(self, user):
         return self.filter(recipient=user)
+
+    def mark_read(self, user):
+        qs = self.get_user(user).unread()
+        qs.update(read=True)
+
+    def mark_unread(self, user):
+        qs = self.get_user(user).read()
+        qs.update(read=False)
+
+    def mark_targetless_as_read(self,user):
+        qs = self.get_user(user).unread().filter(target_object_id=None)
+        qs.update(read=True)
+
     def read(self):
         return self.filter(read=True)
 
     def unread(self):
-        return self.filter(unread=True)
+        return self.filter(read=False)
 
 class NotificationManager(models.Manager):
     def get_queryset(self):
         return NotificationQuerySet(self.model, using=self._db)
 
-    def get_user(self,user):
+    def get_all_user(self,user):
+        # self.get_queryset().mark_unread(user)
+        self.get_queryset().mark_targetless_as_read(user)
         return self.get_queryset().get_user(user)
 
     def get_read(self,user):
@@ -49,20 +65,33 @@ class Notifications(models.Model):
     verb = models.CharField(max_length=512)
     timestamp = models.DateTimeField(auto_now_add=True, auto_now=False)
 
-    unread = models.BooleanField(default=True)
     read = models.BooleanField(default=False)
 
     objects = NotificationManager()
 
+
     def __unicode__(self):
+        try:
+            target_url = self.target_object.get_absolute_url()
+        except:
+            target_url = None
+
         context = {
             'sender': self.sender_object,
             'action': self.action_object,
             'target': self.target_object,
             'recipient': self.recipient,
+            'verify_read': reverse("notification_read", kwargs={"pk": self.id}),
+            'target_url': target_url,
             'verb': self.verb,
         }
-        return  "%(recipient)s : You've got %(verb)s from %(sender)s " % context
+        if self.target_object:
+            if self.action_object and target_url :
+                return "%(sender)s %(verb)s <a href='%(verify_read)s?next=%(target_url)s'>%(target)s</a> with %(action)s" %context
+            if self.action_object and not target_url:
+                return "%(sender)s %(verb)s %(target)s with %(action)s" %context            
+            return "%(sender)s %(verb)s %(target)s" %context
+        return "%(sender)s %(verb)s" %context
 
 #  receiver functions
 def new_notification(sender, **kwargs):

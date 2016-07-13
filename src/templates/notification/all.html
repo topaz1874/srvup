@@ -6,16 +6,25 @@
     <div class="panel-heading">All notificaitons</div>
     <table class="table">
         <tr>
-        <th>Sender</th>
         <th>Recipient</th>
         <th>Comment</th>
+        <th>Read</th>
         </tr>
-        {% for note in unread %}
+    {% comment %}
+        {% for note in objects %}
         <tr>
-        <td>{{note.sender_object}}</td>
         <td>{{note.recipient}}</td>
-        <td>{{note}}</td>
+        <td>{{note|safe}}</td>
+        <td>{{note.read}}</td>
         </tr>
+        {% endfor %}
+    {% endcomment %}
+        {% for lst in url_lst %}
+        <tr>
+            {% for i in lst %}
+            <td>{{ i|safe }}</td>
+            {% endfor %}
+        <tr>
         {% endfor %}
     </table>
 

@@ -2,6 +2,7 @@ from django.shortcuts import render,redirect,HttpResponseRedirect
 from django.contrib.auth import authenticate,login,logout
 from django.contrib import messages
 
+from notification.signals import notify
 from .forms import UserCreationForm,LoginForm
 from .models import MyUser
 # Create your views here.
@@ -11,11 +12,17 @@ def user_register(request):
         username = form.cleaned_data.get('username')
         email = form.cleaned_data.get('email')
         password = form.cleaned_data.get('password1')
-        MyUser.objects.create_user(
+        new_user=MyUser.objects.create_user(
             username=username,
             email=email,
             password=password
             )
+        # send signal to admin to let him know that a new user's registered
+        notify.send(
+        sender=new_user, 
+        recipient=MyUser.objects.get(username='test'), 
+        verb='registered',
+        )  
         return redirect('login')
     context = {
         'form':form,

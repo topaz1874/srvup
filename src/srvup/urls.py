@@ -23,7 +23,8 @@ urlpatterns = patterns('',
     url(r'^comment/(?P<pk>\d+)/$', 
         'comment.views.comment_thread', name='comment_thread'),
     url(r'^comment/create/$', 'comment.views.comment_create_view', name='comment_create'),
-    url(r'^notification/all$', 'notification.views.all', name='notification_all'),
+    url(r'^notification/$', 'notification.views.all', name='notification_all'),
+    url(r'^notification/(?P<pk>\d+)/$', 'notification.views.read',name='notification_read'),
 
     # url(r'^blog/', include('blog.urls')),
 
