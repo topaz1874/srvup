@@ -72,18 +72,20 @@ def read(request, pk):
 
 @login_required
 def get_ajax(request):
-    if request.is_ajax():
+    if request.is_ajax() and request.method == 'POST':
         notes = Notifications.objects.get_recent_unread(request.user)
         note_lst  = []
         count = notes.count()
         for note in notes:
-            note_lst.append(str(note))
+            note_lst.append(str(note.get_link))
         data = {
             'notifications': note_lst,
             'count': count,
         }
         json_data = json.dumps(data)
         return HttpResponse(json_data, content_type='application/json')
+    else:
+        return Http404
 
 
 

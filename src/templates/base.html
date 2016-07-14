@@ -39,9 +39,7 @@
 
   {% include 'navbar.html' %}
   
-  <div class="panel panel-default">
-    <div class="panel-body" id="display_notes"></div>
-  </div>
+
 {% for message in messages %}
     <div class="alert alert-dismissible alert-{{ message.tags }}">
         <button type="button" class="close" data-dismiss="alert">×</button>
@@ -84,21 +82,25 @@
               csrfmiddlewaretoken: "{{ csrf_token }}",
             },
             success:function(data){
-              console.log(data.notifications);
               var count = data.count;
               console.log(count);
-              $('#display_notes').html('');
-              $(data.notifications).each(function(){
-                $('#display_notes').append(this + '<br/>');
-              });
-              },
+              $("#notification-dropdown").html(' <li role="presentation" class="dropdown-header">Notifications</li>');
+                if (count == 0){
+                  var newLink = "{% url 'notification_all' %}"
+                  $('#notification-dropdown').append( '<li><a href="'+ newLink +'">View all Notifications</a></li>');
+                }else{
+                  $(data.notifications).each(function(){
+                    var link = this
+                    $('#notification-dropdown').append( '<li>' + link  + '</li>');
+                  })
+                }
+            },
+
             error:function(rs,e){
               console.log(rs);
               console.log(e);
-            }
-            
-          });
-
+            },
+          })   
         })
       })
     </script>
