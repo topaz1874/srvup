@@ -37,8 +37,10 @@ def comment_create_view(request):
         if comment_form.is_valid():
             text = comment_form.cleaned_data['text']
 
-            # create child comment
+            # parent exist, create child comment
             if parent is not None and parent.video is not None:
+                affected_users = parent.get_affected_users
+                print affected_users
                 video = parent.video
                 new_comment = Comment.objects.create_comment(
                     text=text,
@@ -51,14 +53,16 @@ def comment_create_view(request):
                 # print parent.get_absolute_url() parent  comment thread 
                 # new_comment.get_absolute_url() new comment threads 
 
-                # create a signal that parent comment user receive response
-                notify.send(
-                    sender=request.user, 
-                    recipient=parent.author, 
-                    verb='got an new response',
-                    action=new_comment,
-                    target=parent,
-                    )
+                # send notification to all the other child commentter
+                for user in affected_users:
+                    if user != request.user:
+                        notify.send(
+                            sender=request.user, 
+                            recipient=user, 
+                            verb='got an new response',
+                            action=new_comment,
+                            target=parent,
+                            )
 
                 messages.success(request, "Thanks for your response.")
                 return HttpResponseRedirect(parent.get_absolute_url())
@@ -70,14 +74,14 @@ def comment_create_view(request):
                     video=video,
                     author=request.user,
                     path=origin_path)        
-                # create a signal sending new comment add notification
-                notify.send(
-                    sender=request.user, 
-                    recipient=new_comment.author, 
-                    verb='posted new comment',
-                    action=new_comment,
-                    target=new_comment.video,
-                    )                
+                # do not seen to be needed to notify self
+                # notify.send(
+                #     sender=request.user, 
+                #     recipient=new_comment.author, 
+                #     verb='posted new comment',
+                #     action=new_comment,
+                #     target=new_comment.video,
+                #     )                
                 messages.success(request, "Thanks for your comment.")
                 return HttpResponseRedirect(video.get_absolute_url())
         else:

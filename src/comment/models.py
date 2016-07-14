@@ -72,6 +72,16 @@ class Comment(models.Model):
     def get_absolute_url(self):
         return reverse('comment_thread', kwargs={'pk':self.id})
 
-
+    @property
+    def get_affected_users(self):
+        """just loop through children comment and return all users"""
+        children_comment = self.get_children
+        if children_comment:
+            users = []
+            for child in children_comment:
+                if  child.author not in users:
+                    users.append(child.author)
+            return users
+        return None
 
 
