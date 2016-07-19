@@ -17,7 +17,9 @@
 <ul class="list-group">
 {% for video in object.video_set.all %}
 
-<li class="list-group-item"><a href="{{ video.get_absolute_url }}">{{ video.title }}</a>
+<li class="list-group-item">
+{{ video.ordering }} - 
+<a href="{{ video.get_absolute_url }}">{{ video.title }}</a>
 <br/>
 </li>
 {% endfor %}

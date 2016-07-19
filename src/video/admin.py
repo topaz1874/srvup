@@ -9,13 +9,16 @@ class TaggedItemInline(GenericTabularInline):
         '''
         model = TaggedItem
 
+class VideoInlin(admin.TabularInline):
+    model = Video
+
 class VideoAdmin(admin.ModelAdmin):
     inlines = [TaggedItemInline]
     list_display = ('title','share_message', 'active', 'featured', 'free_preview')
     # prepopulated_fields = {'slug': ('title',)}
 
 class CategoryAdmin(admin.ModelAdmin):
-    inlines = [TaggedItemInline]
+    inlines = [VideoInlin,TaggedItemInline]
     class Meta:
         model = Category
 

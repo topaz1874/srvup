@@ -70,8 +70,12 @@ $('.reply_link').click(function(e){
 <a target='_blank' href="https://twitter.com/home?status={{ object.get_share_message|safe }}">
 <i class="fa fa-twitter fa-3x" aria-hidden="true"></i>
 </a>
-
-
+{% if object.get_next_vid %}
+<a href="{{object.get_next_vid}}">Next</a>
+{% endif %}
+{% if object.get_previous_vid %}
+<a href="{{object.get_previous_vid}}">Previous</a>
+{% endif %}
 <hr/>
 <div class="row">
   <div class="col-sm-12">

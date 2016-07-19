@@ -1,10 +1,15 @@
 {% extends 'base.html' %}
-
+{% load crispy_forms_tags %}
 {% block content %}
+<div class="contain-fluid">
+<div class="col-sm-3 col-sm-offset-3">
 <form method="post" action="{{action}}">{% csrf_token %}
-    {{form.as_p}}
+    
+    {{form | crispy}}
 
     <input type="submit" class="btn btn-primary" name="{{ btn }}">
 </form>
+</div>
+</div>
 
 {% endblock %}

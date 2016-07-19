@@ -4,8 +4,11 @@
 {% block content %}
 {% for object in queryset %}
 
+{% if object.image %}
+<a href="{{ object.get_absolute_url }}"><img src="{{ object.image.url }}" class="image-responsive" /></a>
+{% else %}
 <a href="{{ object.get_absolute_url }}"><ul>{{ object.title }}</ul></a>
-
+{% endif %}
 {% endfor %}
 
 {% endblock %}

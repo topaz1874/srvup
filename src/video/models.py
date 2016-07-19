@@ -6,12 +6,16 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.core.urlresolvers import reverse
 from django.utils.text import slugify
+
+from .utils import get_vid
 # Create your models here.
 class VideoQuerySet(models.QuerySet):
     def featured(self):
         return self.filter(featured=True)
     def active(self):
         return self.filter(active=True)
+    def has_embed(self):
+        return self.filter(embed_code__isnull=False).exclude(embed_code__exact="")
 
 class VideoManager(models.Manager):
     def get_queryset(self):
@@ -24,13 +28,14 @@ class VideoManager(models.Manager):
         return self.get_queryset().featured().active()
 
     def all(self):
-        return self.get_queryset().active()
+        return self.get_queryset().active().has_embed().order_by('ordering','title')
 
 DEFAULT_MESSAGE = """Check out this awesome video."""
 
 class Video(models.Model):
     title = models.CharField(max_length=256)
     share_message = models.TextField(default=DEFAULT_MESSAGE, null=True, blank=True)
+    ordering = models.PositiveIntegerField(default=1)
     slug = models.SlugField(null=True, blank=True, max_length=256)
     tags = GenericRelation("TaggedItem", null=True, blank=True)
     thumbnail = models.ImageField(upload_to='uploads/%Y/%m/%d',null=True,blank=True)
@@ -66,9 +71,29 @@ class Video(models.Model):
         full_url ="%s%s" % (settings.MY_DOMAINS, self.get_absolute_url())
         return full_url
 
+    def save(self, *args, **kwargs):
+        self.ordering = self.id
+        super(Video, self).save(*args, **kwargs)
+
+    def get_next_vid(self):
+        vid = get_vid("next", self)
+        if vid:
+            return vid.get_absolute_url()
+        else:
+            return None
+    def get_previous_vid(self):
+        vid = get_vid("previous", self)
+        if vid:
+            return vid.get_absolute_url()
+        else:
+            return None
+
+
+
 @receiver(post_save, sender=Video)
 def vid_signal_post_save_receiver(sender,instance,created,**kwargs):
-    print "signal sent" 
+    """press save button to create slug and ordering field """
+    print "signal sent"
     if created:
         slugify_title = slugify(instance.title)
         new_slug = "%s %s" %(instance.title, str(instance.id))
@@ -89,6 +114,19 @@ def vid_signal_post_save_receiver(sender,instance,created,**kwargs):
         
 
 # post_save.connect(vid_signal_post_save_receiver, sender=Video)
+class CategoryQuerySet(models.QuerySet):
+    def active(self):
+        return self.filter(active=True)
+    def featured(self):
+        return self.filter(featured=True)
+
+
+class CategoryManager(models.Manager):
+    def get_queryset(self):
+        return CategoryQuerySet(self.model, using=self._db)
+    def all(self):
+        return self.get_queryset().active().featured()
+
 
 class Category(models.Model):
     title = models.CharField(max_length=255)
@@ -101,6 +139,8 @@ class Category(models.Model):
     active = models.BooleanField(default=True)
     featured = models.BooleanField(default=False)
 
+    objects = CategoryManager()
+    
     def __unicode__(self):
         return self.title
 
