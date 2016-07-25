@@ -1,29 +1,40 @@
 {% extends 'base.html' %}
 
-{% block content %}
-
+{% block jumbotron %}
 <div class="jumbotron">
-<div class="container-fluid">
-
-<h2>{{ object.title }}</h4>
+<div class="row">
+<div class="col-sm-6">
+<h3>{{ object.title }}</h3>
 
 {% if object.description %}
 
-<p class="panel-body">{{ object.description }}</p>
+<p>{{ object.description }}</p>
 
 {% endif %}
 </div>
+<div class="col-sm-6">
+<img src="{{object.image.url}}"/>
 </div>
+</div></div>
+
+{% endblock %}
+{% block content %}
+<div class="col-sm-8 col-sm-offset-2">
 <ul class="list-group">
 {% for video in object.video_set.all %}
 
 <li class="list-group-item">
-{{ video.ordering }} - 
+{{ forloop.counter }} - 
+{% if user.is_athenticated or video.has_preview %}
 <a href="{{ video.get_absolute_url }}">{{ video.title }}</a>
+{% else %}
+{{ video.title }}
 <br/>
+{% endif %}
 </li>
 {% endfor %}
 </ul>
+</div>
 
 
 {% endblock %}

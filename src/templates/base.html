@@ -15,55 +15,49 @@
     <!-- Bootstrap core CSS -->
     <!-- <link href="../../dist/css/bootstrap.min.css" rel="stylesheet"> -->
     <!-- Latest compiled and minified CSS -->
-	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
-  
-  <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-T8Gy5hrqNKT+hzMclPo118YTQO6cYprQmhrYwIiQ/3axmI1hQomh7Ud2hPOy8SP1" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+    
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-T8Gy5hrqNKT+hzMclPo118YTQO6cYprQmhrYwIiQ/3axmI1hQomh7Ud2hPOy8SP1" crossorigin="anonymous">
     <!-- Custom styles for this template -->
     <style>
+
     body {
-	  min-height: 2000px;
-	}
+      min-height: 2000px;
+    }
 
-	.navbar-static-top {
-	  margin-bottom: 19px;
-	}
-	{% block style %}
+    .navbar-static-top {
+      margin-bottom: 19px;
+    }
 
-	{% endblock %}
-	</style>
-	{% include 'extra_head_info.html' %}
+    {% block style %}
+
+    {% endblock %}
+    </style>
+
+  {% include 'extra_head_info.html' %}
 
   </head>
 
   <body>
 
   {% include 'navbar.html' %}
-  
+  <div class="container">
+    {% for message in messages %}
+        <div class="alert alert-dismissible alert-{{ message.tags }}">
+            <button type="button" class="close" data-dismiss="alert">×</button>
+            {{ message }}
+        </div>
+    {% endfor %}
 
-{% for message in messages %}
-    <div class="alert alert-dismissible alert-{{ message.tags }}">
-        <button type="button" class="close" data-dismiss="alert">×</button>
-        {{ message }}
-    </div>
-{% endfor %}
 
-    <div class="container">
-    	{% block content %}
-    	{% endblock %}
+    {% block jumbotron %}
+    {% endblock %}
 
-      <!-- Main component for a primary marketing message or call to action 
-      <div class="jumbotron">
-        <h1>Navbar example</h1>
-        <p>This example is a quick exercise to illustrate how the default, static and fixed to top navbar work. It includes the responsive CSS and HTML, so it also adapts to your viewport and device.</p>
-        <p>To see the difference between static and fixed top navbars, just scroll.</p>
-        <p>
-          <a class="btn btn-lg btn-primary" href="../../components/#navbar" role="button">View navbar docs &raquo;</a>
-        </p>
-      </div> -->
-
-    </div> <!-- /container -->
-
+    {% block content %}
+    {% endblock %}
+  </div>
     {% include 'javascript.html' %}
+
     <script type="text/javascript">
       $(document).ready(function(){
         {% block jquery %}

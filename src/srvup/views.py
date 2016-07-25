@@ -1,25 +1,16 @@
-from django.utils.safestring import mark_safe
+# from django.utils.safestring import mark_safe
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 
-from video.models import Video
-
+from account.forms import UserCreationForm, LoginForm
 # @login_required(login_url='/enroll/login')
-@login_required
+# @login_required
 def home(request):
-    name = "Justin"
-    videos = Video.objects.all()
-    embeds = []
-    for vid in videos:
-        code = mark_safe(vid.embed_code)
-        embeds.append("%s"%(code))
-
-
+    register_form = UserCreationForm()
+    login_form = LoginForm()
     context = {
-		"the_name": name,
-		"videos": videos,
-        "numbers": videos.count(),
-        "the_embeds":embeds,
+        'register_form': register_form,
+        'login_form': login_form,
 
 	}
     return render(request, "home.html", context)

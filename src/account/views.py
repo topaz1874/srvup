@@ -22,7 +22,8 @@ def user_register(request):
         sender=new_user, 
         recipient=MyUser.objects.get(username='test'), 
         verb='registered',
-        )  
+        ) 
+        messages.success(request, 'Thanks for your register, now you can login your account.')
         return redirect('login')
     context = {
         'form':form,

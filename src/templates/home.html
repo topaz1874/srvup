@@ -1,34 +1,61 @@
 {% extends "base.html" %}
+{% load crispy_forms_tags %}
 
 {% block title %}Welcome | {% endblock %}
 
 
+{% block jumbotron %}
+<div class="jumbotron">
+    <div class="row">
+        <div class="col-sm-6">
+            <h1>Welcome</h1>
+            <p>This is our site.</p>
+        </div>
+    {% if not user.is_authenticated %}
+      <div class="col-sm-6">
+
+            <div>
+              <!-- Nav tabs -->
+              <ul class="nav nav-tabs" role="tablist">
+                <li role="presentation" class="active"><a href="#register" aria-controls="register" role="tab" data-toggle="tab">register</a></li>
+                <li role="presentation"><a href="#Login" aria-controls="Login" role="tab" data-toggle="tab">Login</a></li>
+              </ul>
+
+              <!-- Tab panes -->
+              <div class="tab-content">
+                <div role="tabpanel" class="tab-pane active" id="register">  
+                <div class="panel panel-default">
+                <div class="panel-body">
+                    <form method="post" action="{% url 'register' %}">
+                        {% csrf_token %}
+                        {{ register_form | crispy }}
+                        <input class="btn btn-default btn-block btn-lg" type="submit" value="Register">
+                    </form>
+
+                </div>
+                </div></div>
+                <div role="tabpanel" class="tab-pane" id="Login">
+                <div class="panel panel-default">
+                <div class="panel-body">
+                    <form method="post" action="{% url 'login' %}">
+                        {% csrf_token %}
+                        {{ login_form | crispy }}
+                        <input class="btn btn-default btn-block btn-lg" type="submit" value="Login">
+                    </form>
+                </div></div>
+                </div>
+
+              </div>
+
+            </div>
+      </div>{% endif %}
+    </div>
+</div>
+
+{% endblock %}
 {% block content %}
 <div class="container">
-
-    {% for video in videos %}
-    <div class="row">
-
-        <div class="col-sm-6">
-            <a href="{{ video.get_absolute_url }}">
-                <h4>{{ video.title }}</h4> 
-            </a>
-            <div  class="embed-responsive embed-responsive-16by9">
-                  {{video.embed_code|safe}} 
-            </div>
-        </div>
-    </div>
-
-    {% endfor %}
-
-
-<br/>
-<br/>
-
-<h1>Embeds</h1>
-{% for embed in the_embeds %}
-{{ embed|safe }}
-{% endfor %}
+    
 
 </div>
 
@@ -37,13 +64,10 @@
 
 <style>
 {% block style %}
-h1 {
-    color: red;
-}
+
 
 .container{
 
-  background: #e3e3e3;
 }
 
 {% endblock %}

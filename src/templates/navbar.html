@@ -25,9 +25,12 @@
               </ul>
             </li>           
             <li><a href="{% url 'logout' %}">{{ user }} | Logout</a></li>
-          {% else %}
-            <li><a href="{% url 'login' %}">LogIn</a></li>
-            <li><a href="{% url 'register' %}">Register</a></li>
+            {% else %}
+              {% if request.get_full_path == "/" %}
+              {% else %}
+                <li><a href="{% url 'login' %}">Login</a></li>
+                <li><a href="{% url 'register' %}">Register</a></li>
+              {% endif %}
           {% endif %}
           </ul>
         </div><!--/.nav-collapse -->

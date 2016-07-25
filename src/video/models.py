@@ -87,6 +87,12 @@ class Video(models.Model):
             return vid.get_absolute_url()
         else:
             return None
+    @property
+    def has_preview(self):
+        if self.free_preview:
+            return True
+        return False
+    
 
 
 
