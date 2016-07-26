@@ -47,6 +47,7 @@ INSTALLED_APPS = (
     'account',
     'comment',
     'notification',
+    'analytics',
 )
 
 CRISPY_TEMPLATE_PACK = 'bootstrap3'
@@ -92,7 +93,7 @@ DATABASES = {
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Shanghai'
 
 USE_I18N = True
 
