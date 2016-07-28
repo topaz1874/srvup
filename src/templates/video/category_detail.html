@@ -23,16 +23,16 @@
 <ul class="list-group">
 {% for video in object.video_set.all %}
 
-<li class="list-group-item">
-{{ forloop.counter }} - 
-{% if user.is_athenticated or video.has_preview %}
-<a href="{{ video.get_absolute_url }}">{{ video.title }}</a>
-{% else %}
-{{ video.title }}
-<br/>
-{% endif %}
-</li>
-{% endfor %}
+    <li class="list-group-item">
+    {{ forloop.counter }} - 
+        {% if user.is_authenticated or video.has_preview %}
+        <a href="{{ video.get_absolute_url }}">{{ video.title }}</a>
+        {% else %}
+        {{ video.title }}
+        <br/>
+        {% endif %}
+    </li>
+    {% endfor %}
 </ul>
 </div>
 

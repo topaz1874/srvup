@@ -3,6 +3,7 @@ from django.core.urlresolvers import reverse
 # from django.contrib.auth.decorators import login_required
 from .models import Video,Category
 from comment.forms import CommentForm
+from analytics.signals import page_view
 
 # @login_required
 def video_detail(request,cat_slug,vid_slug):
@@ -13,6 +14,11 @@ def video_detail(request,cat_slug,vid_slug):
     """
     cat = get_object_or_404(Category, slug=cat_slug)
     obj = get_object_or_404(Video, category=cat, slug=vid_slug)
+    page_view.send(
+        sender = request.user,
+        path = request.get_full_path(),
+        primary_obj = obj,
+        secondary_obj = cat)
     if request.user.is_authenticated() or obj.has_preview:
         comments = obj.comment_set.all()
         comment_form = CommentForm(request.POST or None)
@@ -32,5 +38,9 @@ def category_list(request):
 
 def category_detail(request, cat_slug):
     cat = get_object_or_404(Category,slug=cat_slug)
+    page_view.send(
+        sender = request.user,
+        path = request.get_full_path(),
+        primary_obj = cat,)
     return render(request, 'video/category_detail.html', {'object': cat,})
 
