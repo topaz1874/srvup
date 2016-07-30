@@ -5,13 +5,13 @@
 
 
 {% block jumbotron %}
+
 <div class="jumbotron">
     <div class="row">
         <div class="col-sm-6">
             <h1>Welcome</h1>
             <p>This is our site.</p>
         </div>
-    {% if not user.is_authenticated %}
       <div class="col-sm-6">
 
             <div>
@@ -48,27 +48,8 @@
               </div>
 
             </div>
-      </div>{% endif %}
+      </div>
     </div>
 </div>
 
 {% endblock %}
-{% block content %}
-<div class="container">
-    
-
-</div>
-
-{% endblock %}
-
-
-<style>
-{% block style %}
-
-
-.container{
-
-}
-
-{% endblock %}
-</style>

@@ -1,6 +1,7 @@
 from django.db import models
+from django.conf import settings
 from django.core.urlresolvers import reverse
-
+from django.template.defaultfilters import truncatechars
 from account.models import MyUser
 from video.models import Video
 # Create your models here.
@@ -8,12 +9,27 @@ class CommentQuerySet(models.QuerySet):
     def all(self):
         return self.filter(active=True).filter(parent=None)
 
+    # def recent(self, user):
+    #     return self.filter(active=True).filter(author=user).filter(parent=None)[:3]
+    
+    def recent(self):
+        try:
+            recent_num = settings.DISPLAY_RECENT_COMMENTS_NUM
+        except:
+            recent_num = 3
+
+        return self.filter(active=True).filter(parent=None)[:recent_num]
+
+
 class CommentManager(models.Manager):
     def get_queryset(self):
         return CommentQuerySet(self.model, using=self._db)
 
     def all(self):
         return self.get_queryset().all()
+
+    def get_recent(self):
+        return self.get_queryset().recent()
 
     def create_comment(self, text=None, author=None, video=None, path=None, parent=None):
         if not path:
@@ -48,6 +64,13 @@ class Comment(models.Model):
 
     def __unicode__(self):
         return self.text
+
+    class Meta:
+        ordering = ['-timestamp']
+
+    @property
+    def get_preview(self):
+        return truncatechars(self.text, 60)
         
     @property
     def get_comment(self):

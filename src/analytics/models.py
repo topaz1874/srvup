@@ -5,7 +5,29 @@ from django.contrib.contenttypes.models import ContentType
 from django.dispatch import receiver
 from django.utils import timezone
 
+from video.models import Video,Category
 from .signals import page_view
+
+class PageViewQuerySet(models.QuerySet):
+    def videos(self):
+        primary_content_type = ContentType.objects.get_for_model(Video)
+        return self.filter(primary_content_type=primary_content_type)
+
+    def categories(self):
+        primary_content_type = ContentType.objects.get_for_model(Category)
+        return self.filter(primary_content_type=primary_content_type)
+
+
+class PageViewManager(models.Manager):
+    def get_queryset(self):
+        return PageViewQuerySet(self.model, using=self._db)
+
+    def get_videos(self):
+        return self.get_queryset().videos()
+
+    def get_categories(self):
+        return self.get_queryset().categories()
+
 
 class PageView(models.Model):
     user = models.ForeignKey(
@@ -13,7 +35,7 @@ class PageView(models.Model):
         null=True, 
         blank=True)
     path = models.CharField(max_length=256)
-    timestamp = models.DateField(default=timezone.now())
+    timestamp = models.DateField(default=timezone.now)
     count = models.PositiveIntegerField(default=1)
     primary_content_type = models.ForeignKey(ContentType,related_name='primary_obj',
                                              null=True, blank=True)
@@ -25,10 +47,15 @@ class PageView(models.Model):
     secondary_object_id = models.PositiveIntegerField(null=True, blank=True)
     secondary_content_object = GenericForeignKey('secondary_content_type', 'secondary_object_id')
 
+    objects = PageViewManager()
+
     def __unicode__(self):
         if self.user:
-            return "%s: %s" % (self.user, self.path)
+            return "%s: %s" % (self.user, self.path)  
         return self.path
+
+    class Meta:
+        ordering = ['-timestamp']
 
 @receiver(page_view)
 def page_view_handler(sender,**kwargs):

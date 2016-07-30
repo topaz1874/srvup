@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}Welcome | {% endblock %}
+
+
+{% block content %}
+<div class="row">
+    {% if obj_lst %}
+    <div class="col-sm-8 col-sm-offset-2">
+    <div class="panel panel-default">
+      <div class="panel-heading">
+      <h4 class="panel-title">Your recently videos</h4>
+      </div>
+      <ul class="list-group">
+        {% for video in obj_lst %}
+        <li class="list-group-item">
+        {{ forloop.counter }} - 
+            <a href="{{ video.get_absolute_url }}">{{ video.title }}</a>
+            <br/>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+    </div>
+    {% endif %}
+
+    {% if recent_comments %}
+    <div class="col-sm-8 col-sm-offset-2">
+    <div class="panel panel-default">
+      <div class="panel-heading">
+      <h4 class="panel-title">Your recently comments</h4>
+      </div>
+      <ul class="list-group">
+        {% for obj in recent_comments %}
+        <li class="list-group-item">
+        {{ forloop.counter }} - 
+            <a href="{{ obj.get_absolute_url }}">{{ obj.get_preview }}</a>  <small>{{obj.timestamp|timesince}}</small>
+            <br/>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+    </div>
+</div>
+{% endblock %}

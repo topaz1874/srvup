@@ -31,6 +31,7 @@ MY_DOMAINS = 'http://topaz1874.pythonanywhere.com'
 LOGIN_URL = '/login/'
 # Application definition
 AUTH_USER_MODEL = 'account.MyUser'
+DISPLAY_RECENT_COMMENTS_NUM = 5
 
 INSTALLED_APPS = (
     'django.contrib.admin',
