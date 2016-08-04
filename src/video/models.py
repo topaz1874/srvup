@@ -71,10 +71,6 @@ class Video(models.Model):
         full_url ="%s%s" % (settings.MY_DOMAINS, self.get_absolute_url())
         return full_url
 
-    def save(self, *args, **kwargs):
-        self.ordering = self.id
-        super(Video, self).save(*args, **kwargs)
-
     def get_next_vid(self):
         vid = get_vid("next", self)
         if vid:
@@ -101,6 +97,7 @@ def vid_signal_post_save_receiver(sender,instance,created,**kwargs):
     """press save button to create slug and ordering field """
     print "signal sent"
     if created:
+        instance.ordering = instance.id
         slugify_title = slugify(instance.title)
         new_slug = "%s %s" %(instance.title, str(instance.id))
         try:

@@ -24,6 +24,25 @@
     </div>
     {% endif %}
 
+    {% if popular_videos %}
+    <div class="col-sm-8 col-sm-offset-2">
+    <div class="panel panel-default">
+      <div class="panel-heading">
+      <h4 class="panel-title">Your popluar videos</h4>
+      </div>
+      <ul class="list-group">
+        {% for video in popular_videos %}
+        <li class="list-group-item">
+        {{ forloop.counter }} - 
+            <a href="{{ video.get_absolute_url }}">{{ video.title }}</a>
+            <br/>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+    </div>
+    {% endif %}
+
     {% if recent_comments %}
     <div class="col-sm-8 col-sm-offset-2">
     <div class="panel panel-default">
@@ -42,5 +61,6 @@
     </div>
     {% endif %}
     </div>
+
 </div>
 {% endblock %}
