@@ -49,6 +49,7 @@ INSTALLED_APPS = (
     'comment',
     'notification',
     'analytics',
+    'billing',
 )
 
 CRISPY_TEMPLATE_PACK = 'bootstrap3'

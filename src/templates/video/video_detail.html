@@ -77,6 +77,9 @@ $('.reply_link').click(function(e){
 <a href="{{object.get_previous_vid}}">Previous</a>
 {% endif %}
 <hr/>
+
+  {% if comment_form and comment %}
+
 <div class="row">
   <div class="col-sm-12">
       <form method="post" action="{% url 'comment_create' %}">{% csrf_token %}
@@ -116,7 +119,7 @@ $('.reply_link').click(function(e){
     {% endfor %}
     </table>
   </div>
-
+{% endif %}
 
 </div>
 {% endblock %}

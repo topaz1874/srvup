@@ -62,7 +62,7 @@ def page_view_handler(sender,**kwargs):
     path = kwargs.get('path')
 
     if sender.is_anonymous():
-        new_page_view, created = PageView.objects.get_or_create(path=path, timestamp=timezone.now())
+        new_page_view, created = PageView.objects.get_or_create(path=path,user=None,timestamp=timezone.now())
     else:
         new_page_view, created = PageView.objects.get_or_create(user=sender,path=path, timestamp=timezone.now())
     

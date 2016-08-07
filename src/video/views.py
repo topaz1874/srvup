@@ -14,19 +14,32 @@ def video_detail(request,cat_slug,vid_slug):
     """
     cat = get_object_or_404(Category, slug=cat_slug)
     obj = get_object_or_404(Video, category=cat, slug=vid_slug)
+    
     page_view.send(
         sender = request.user,
         path = request.get_full_path(),
         primary_obj = obj,
         secondary_obj = cat)
-    if request.user.is_authenticated() or obj.has_preview:
-        comments = obj.comment_set.all()
-        comment_form = CommentForm(request.POST or None)
-        return render(request, 'video/video_detail.html', {
-            'object':obj,
-            'comments':comments,
-            'comment_form':comment_form,
-            })
+
+
+    if request.user.is_authenticated():
+        member = request.user.is_member
+        if member:
+            comments = obj.comment_set.all()
+            comment_form = CommentForm(request.POST or None)
+            return render(request, 'video/video_detail.html', {
+                'object':obj,
+                'comments':comments,
+                'comment_form':comment_form,
+                })
+        else:
+            # upgrade to become a member
+            next_url = obj.get_absolute_url()
+            return HttpResponseRedirect('%s?next=%s' % (reverse('upgrade'),next_url))
+    
+    elif obj.has_preview:
+        return render(request, 'video/video_detail.html', {'object':obj,})
+
     else:
         next_url = obj.get_absolute_url()
         return HttpResponseRedirect('%s?next=%s' % (reverse('login'),next_url))
