@@ -1,3 +1,5 @@
+import random
+
 from django.conf import settings
 from django.db import models
 from django.dispatch import receiver
@@ -38,6 +40,56 @@ def become_member_handler(sender, **kwargs):
 def post_save_handler(sender, instance, created, **kwargs):
     if not created: 
         instance.update_status()
+
+
+
+class TransactionManager(models.Manager):
+    def create_newtrans(self, user, transaction_id, amount, card_type,\
+        last_four=None, success=None, transaction_status=None):
+        if not user:
+            raise ValueError("User must be added.")
+        if not transaction_id:
+            raise ValueError("Must completed a transaction to add an new.")
+
+        new_order_id = "%s%s%s" % (transaction_id[:2], random.randint(1,9), transaction_id[2:])
+        newtrans = self.model(
+            user=user,
+            transaction_id=transaction_id,
+            amount=amount,
+            card_type=card_type,
+            order_id = new_order_id)
+        if last_four is not None:
+            newtrans.last_four = last_four
+        if success is not None:
+            newtrans.success = success
+            newtrans.transaction_status = transaction_status
+
+        newtrans.save(using=self._db)
+        return newtrans.order_id
+
+
+class Transaction(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL)
+    transaction_id = models.CharField(max_length=256) #braintree or stripe
+    amount = models.DecimalField(max_digits=100, decimal_places=2)
+    card_type = models.CharField(max_length=256) #paypal
+    last_four = models.PositiveIntegerField(null=True, blank=True)
+    success = models.BooleanField(default=True) #if fail then status log errors
+    transaction_status = models.CharField(max_length=256, null=True, blank=True)
+    order_id = models.CharField(max_length=256)
+    timestamp = models.DateTimeField(auto_now=False, auto_now_add=True)
+
+    objects = TransactionManager()
+
+    def __unicode__(self):
+        return self.order_id
+
+
+
+
+
+
+
 
 
 
