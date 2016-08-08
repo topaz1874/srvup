@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{%  load humanize %}
+
+{% block content %}
+
+<div row>
+<div col-sm-6 col-sm-offset-3>
+<div class="panel panel-info">
+  <div class="panel-heading">
+  <h3 class="panel-title">{{ request.user }}'s billing history</h3>
+  </div>
+
+<table class="table">
+    <thead>
+        <th>#</th>
+        <th>order id</th>
+        <th>amount</th>
+        <th>card type</th>
+        <th>time since</th>
+    </thead>
+    <tbody>
+        {% for obj in queryset %}
+        <tr>
+            <td>{{forloop.counter}}</td>
+            <td>{{obj.order_id}}</td>
+            <td>{{obj.amount}}</td>
+            <td>{{obj.card_type}}</td>
+            <td>{{obj.timestamp | naturaltime }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+    
+</table>
+</div>
+</div></div>
+
+{% endblock %}
+

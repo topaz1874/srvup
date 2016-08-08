@@ -28,6 +28,7 @@ urlpatterns = patterns('',
     url(r'^notification/(?P<pk>\d+)/$', 'notification.views.read',name='notification_read'),
 
     url(r'^billing/upgrade/$', 'billing.views.upgrade', name='upgrade'),
+    url(r'^billing/history/$', 'billing.views.history', name='history'),
 
     url(r'^admin/', include(admin.site.urls)),
 ) 

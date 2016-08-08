@@ -41,9 +41,17 @@ def post_save_handler(sender, instance, created, **kwargs):
     if not created: 
         instance.update_status()
 
-
+class TransactionQuerySet(models.QuerySet):
+    def success(self):
+        return self.filter(success=True)
 
 class TransactionManager(models.Manager):
+    def get_queryset(self):
+        return TransactionQuerySet(self.model, using=self._db)
+
+    def get_success(self):
+        return self.get_queryset().success()
+
     def create_newtrans(self, user, transaction_id, amount, card_type,\
         last_four=None, success=None, transaction_status=None):
         if not user:
@@ -84,7 +92,8 @@ class Transaction(models.Model):
     def __unicode__(self):
         return self.order_id
 
-
+    class Meta:
+        ordering = ['-timestamp']
 
 
 
