@@ -7,7 +7,7 @@ from django.utils import timezone
 
 from dateutil.relativedelta import relativedelta
 
-from .signals import become_member
+from .signals import become_member,membership_date_update
 
 # Create your models here.
 class Membership(models.Model):
@@ -36,10 +36,24 @@ def become_member_handler(sender, **kwargs):
         user.membership.save()
         user.membership.update_status()
 
+@receiver(membership_date_update)
+def membership_date_update_handler(sender, new_date_start, **kwargs):
+    membership = sender
+    current_date_end = membership.date_end
+    if current_date_end >= new_date_start:
+        membership.date_end += relativedelta(months=1)
+    else:
+        membership.date_start = new_date_start
+        membership.date_end = new_date_start + relativedelta(months=1)
+    membership.save()
+    membership.update_status()
+
+
 @receiver(models.signals.post_save, sender=Membership)
 def post_save_handler(sender, instance, created, **kwargs):
     if not created: 
         instance.update_status()
+
 
 class TransactionQuerySet(models.QuerySet):
     def success(self):
@@ -73,7 +87,7 @@ class TransactionManager(models.Manager):
             newtrans.transaction_status = transaction_status
 
         newtrans.save(using=self._db)
-        return newtrans.order_id
+        return newtrans
 
 
 class Transaction(models.Model):
