@@ -3,9 +3,20 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render,HttpResponseRedirect,Http404
 from django.contrib import messages
 
-from .models import Transaction,Membership
+import braintree
+
+from .models import Transaction,Membership,UserMerchantID
 from .signals import become_member,membership_date_update
 # Create your views here.
+
+braintree.Configuration.configure(
+    braintree.Environment.Sandbox,
+    'q3m29r7tg2hj3fx3',
+    'n7frpfxd8453gtn2',
+    '15f9f94d97f31151598663137e05cfe1'
+)
+PLAN_ID = "monthly_plan"
+
 def upgrade(request):
 
     if request.user.is_authenticated():
@@ -14,6 +25,20 @@ def upgrade(request):
         member = request.POST.get('member')
         month = request.POST.get('month')
         trans = request.POST.get('trans')
+
+        try:
+            UserMerchantID.objects.get(user=request.user)
+        except UserMerchantID.DoesNotExist:
+            new_customer_result = braintree.Customer.create({})
+            if new_customer_result.is_success:
+                UserMerchantID.objects.create(
+                    user=request.user,
+                    customer_id=new_customer_result.customer.id)
+                print """Customer created with id = {0}""".format(new_customer_result.customer.id)
+            else:
+                print """Error: {0}""".format(new_customer_result.message)
+        except:
+            pass
 
         if trans:
             newtrans = Transaction.objects.create_newtrans(
