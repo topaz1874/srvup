@@ -18,22 +18,23 @@ braintree.Configuration.configure(
 PLAN_ID = "monthly_plan"
 
 def upgrade(request):
-
     if request.user.is_authenticated():
-        context = {}
+        client_token = braintree.ClientToken.generate()
+        context = {'client_token':client_token}
         next_url = request.GET.get('next')
         member = request.POST.get('member')
         month = request.POST.get('month')
         trans = request.POST.get('trans')
 
         try:
-            UserMerchantID.objects.get(user=request.user)
+            merchant_customer_id = UserMerchantID.objects.get(user=request.user).customer_id
         except UserMerchantID.DoesNotExist:
             new_customer_result = braintree.Customer.create({})
             if new_customer_result.is_success:
+                merchant_customer_id = new_customer_result.customer.id
                 UserMerchantID.objects.create(
                     user=request.user,
-                    customer_id=new_customer_result.customer.id)
+                    customer_id=merchant_customer_id)
                 print """Customer created with id = {0}""".format(new_customer_result.customer.id)
             else:
                 print """Error: {0}""".format(new_customer_result.message)
