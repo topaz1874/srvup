@@ -1,7 +1,7 @@
-import random
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render,HttpResponseRedirect,Http404
 from django.contrib import messages
+from django.core.urlresolvers import reverse
+from django.shortcuts import render,HttpResponseRedirect,Http404
 
 import braintree
 
@@ -19,20 +19,24 @@ PLAN_ID = "monthly_plan"
 
 def upgrade(request):
     if request.user.is_authenticated():
+        # generate client token 
         client_token = braintree.ClientToken.generate()
         context = {'client_token':client_token}
+
         next_url = request.GET.get('next')
         member = request.POST.get('member')
         month = request.POST.get('month')
-        trans = request.POST.get('trans')
+        merchant_customer_id = None
 
         try:
-            merchant_customer_id = UserMerchantID.objects.get(user=request.user).customer_id
+            merchant_obj = UserMerchantID.objects.get(user=request.user)
         except UserMerchantID.DoesNotExist:
+            #create a new braintree customer
             new_customer_result = braintree.Customer.create({})
+            #customer successed record customer id to UserMerchantID table
             if new_customer_result.is_success:
                 merchant_customer_id = new_customer_result.customer.id
-                UserMerchantID.objects.create(
+                merchant_obj, created = UserMerchantID.objects.get_or_create(
                     user=request.user,
                     customer_id=merchant_customer_id)
                 print """Customer created with id = {0}""".format(new_customer_result.customer.id)
@@ -40,13 +44,34 @@ def upgrade(request):
                 print """Error: {0}""".format(new_customer_result.message)
         except:
             pass
+        # clicked pay button the request post  would send payment method nonce
+        # update customer payment method
+        # receive payment method token aka credit card token
+        merchant_customer_id = merchant_obj.customer_id
+        nonce = request.POST.get('payment_method_nonce', None)
+        if nonce is not None:
+            update_customer_result = braintree.Customer.update(merchant_customer_id,{
+                'payment_method_nonce':nonce,
+                })
+            credit_card_token = update_customer_result.customer.credit_cards[0].token
 
-        if trans:
-            newtrans = Transaction.objects.create_newtrans(
+            #create a new braintree subscription with token
+            subscription_result = braintree.Subscription.create({
+                "payment_method_token": credit_card_token,
+                "plan_id":PLAN_ID,
+                })
+            # subscription success record subscription id to Transaction table
+            if subscription_result.is_success:
+                print "success" 
+                trans_id = subscription_result.subscription.id 
+                #need to amend  transaction id  there were suscription id for now  
+                #in Trans table order id was composed by trans id 
+                newtrans = Transaction.objects.create_newtrans(
                 user=request.user,
-                transaction_id='safwfaq%sasfqfw' % (random.randint(1,10000)),
+                transaction_id=trans_id,
                 amount=25.00,
                 card_type='visa',)
+            # transaction successed update membership state
             if newtrans.success:
                 membership_instance, created = Membership.objects.get_or_create(
                     user=request.user)
@@ -54,7 +79,11 @@ def upgrade(request):
                     sender=membership_instance,
                     new_date_start=newtrans.timestamp,)
                 messages.success(request, 'Thanks for you support, now you become our site member, enjoy.')
-                return HttpResponseRedirect(next_url)
+                return HttpResponseRedirect(reverse('history'))
+            else:
+                print "failed"
+
+
 
 
         if member:
