@@ -52,7 +52,7 @@ class CommentManager(models.Manager):
 
 class Comment(models.Model):
     text = models.TextField()
-    author = models.ForeignKey(MyUser)
+    author = models.ForeignKey('account.MyUser')
     parent = models.ForeignKey('self', null=True, blank=True)
     video = models.ForeignKey(Video, null=True, blank=True)
     path = models.CharField(max_length=512)

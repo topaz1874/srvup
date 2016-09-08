@@ -1,7 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.urlresolvers import reverse
-from django.shortcuts import render,HttpResponseRedirect,Http404
+from django.shortcuts import render,HttpResponseRedirect,Http404,redirect
 
 import braintree
 
@@ -42,7 +42,9 @@ def upgrade(request):
                 print """Customer created with id = {0}""".format(new_customer_result.customer.id)
             else:
                 print """Error: {0}""".format(new_customer_result.message)
+                messages.error(request, "There was an error with your account. Please contact us.")
         except:
+            messages.error(request, "There wan an error with the server. Please try again or contact us if problem persist.")
             pass
         # clicked pay button the request post  would send payment method nonce
         # update customer payment method
@@ -50,46 +52,69 @@ def upgrade(request):
         merchant_customer_id = merchant_obj.customer_id
         nonce = request.POST.get('payment_method_nonce', None)
         if nonce is not None:
-            update_customer_result = braintree.Customer.update(merchant_customer_id,{
-                'payment_method_nonce':nonce,
-                })
-            credit_card_token = update_customer_result.customer.credit_cards[0].token
 
-            #create a new braintree subscription with token
+            payment_method_result = braintree.PaymentMethod.create({
+                "customer_id": merchant_customer_id,
+                "payment_method_nonce": nonce,
+                "options": {
+                    "make_default": True }
+                })
+            the_token = payment_method_result.payment_method.token
+
             subscription_result = braintree.Subscription.create({
-                "payment_method_token": credit_card_token,
+                "payment_method_token": the_token,
                 "plan_id":PLAN_ID,
                 })
-            # subscription success record subscription id to Transaction table
+
             if subscription_result.is_success:
-                print "success" 
-                trans_id = subscription_result.subscription.id 
-                #need to amend  transaction id  there were suscription id for now  
-                #in Trans table order id was composed by trans id 
-                newtrans = Transaction.objects.create_newtrans(
-                user=request.user,
-                transaction_id=trans_id,
-                amount=25.00,
-                card_type='visa',)
-            # transaction successed update membership state
-            if newtrans.success:
-                membership_instance, created = Membership.objects.get_or_create(
-                    user=request.user)
-                membership_date_update.send(
-                    sender=membership_instance,
-                    new_date_start=newtrans.timestamp,)
-                messages.success(request, 'Thanks for you support, now you become our site member, enjoy.')
-                return HttpResponseRedirect(reverse('history'))
+                payment_type = subscription_result.subscription.transactions[0].payment_instrument_type
+                trans_id = subscription_result.subscription.transactions[0].id
+                sub_id = subscription_result.subscription.id
+                sub_amount = subscription_result.subscription.price
+
+                if payment_type == braintree.PaymentInstrumentType.PayPalAccount:
+                    newtrans = Transaction.objects.create_newtrans(
+                    user=request.user,
+                    transaction_id=trans_id,
+                    amount=sub_amount,
+                    card_type='paypal',)
+                    trans_success = newtrans.success
+                elif payment_type == braintree.PaymentInstrumentType.CreditCard:
+                    credit_card_details = subscription_result.subscription.transactions[0].credit_card_details
+                    card_type = credit_card_details.card_type
+                    last_4 = credit_card_details.last_4
+                    newtrans = Transaction.objects.create_newtrans(
+                    user=request.user,
+                    transaction_id=trans_id,
+                    amount=sub_amount,
+                    card_type=card_type,
+                    last_four=last_4)
+                    trans_success = newtrans.success
+                else:
+                    trans_success = False
+
+                if trans_success:
+                    membership_instance, created = Membership.objects.get_or_create(
+                        user=request.user)
+                    membership_date_update.send(
+                        sender=membership_instance,
+                        new_date_start=newtrans.timestamp,)
+                    messages.success(request, 'Thanks for you support, now you become our site member, enjoy.')
+                    # return HttpResponseRedirect(reverse('history'))
+                    return redirect('history')
+                else:
+                    messages.error(request, 'There was an error with your trans, please contact us.')
+                    return redirect('upgrade')
             else:
-                print "failed"
-
-
+                error_ms = subscription_result.subscription.message
+                messages.error(request, "An error occured: %s" % (error_ms))
+                return redirect('upgrade')
 
 
         if member:
             become_member.send(sender=request.user,
                                 month=str(month))
-            messages.success(request, 'HoHO, now you become our site member, enjoy.')
+            messages.success(request, 'Hoho, now you become our site member, enjoy.')
             return HttpResponseRedirect(next_url)
         return render(request, 'billing/upgrade.html', context)
     return Http404
