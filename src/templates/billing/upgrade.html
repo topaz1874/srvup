@@ -6,6 +6,12 @@
         container: 'dropin-container',
         form: 'checkout-form',
     });
+    $("#submitPayment").on("click", function(){
+        var btn = $(this).button("loading")
+        setTimeout(function(){
+            btn.button('reset');
+        },3000)
+    });
 {% endblock %}
 </script>
 
@@ -18,7 +24,7 @@
     <p><input type="radio" name="month" value="1" aria-label="select as monthly membership" > One Month Membership</p>
     <p><input type="radio" name="month" value="12" aria-label="select as year membership"> One Year Membership</p>
 <input type="hidden" name="member" value="True"/>
-<input type="submit" class="btn btn-default" value="submit" />
+<input  type="submit"  class="btn btn-default" value="submit" />
     
 </form>
 </div>
@@ -28,7 +34,7 @@
 <div class="col-sm-6 col-sm-offset-3">
 <form id="checkout-form" method="post" action=".">{% csrf_token %}
 <div id="dropin-container" ></div>
- <input type='submit' class='btn btn-default btn-block' value='Pay'/>
+ <input id='submitPayment' type='submit' data-loading-text="Completing..." class='btn btn-default btn-block' value='Pay'/>
 </form>
 </div>
 </div>

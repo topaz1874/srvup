@@ -25,7 +25,7 @@
 
     <li class="list-group-item">
     {{ forloop.counter }} - 
-        {% if user.is_authenticated or video.has_preview %}
+        {% if user.is_member or video.has_preview %}
         <a href="{{ video.get_absolute_url }}">{{ video.title }}</a>
         {% else %}
         {{ video.title }}

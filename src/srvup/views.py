@@ -1,5 +1,5 @@
 # from django.utils.safestring import mark_safe
-from django.shortcuts import render
+from django.shortcuts import render,redirect
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count
@@ -36,7 +36,8 @@ def home(request):
             if obj not in obj_lst:
                 obj_lst.append(obj) 
 
-
+        if  len(obj_lst) == 0:
+            return redirect('category_list')
         context = {
         'obj_lst':obj_lst,
         'recent_comments': recent_comments,

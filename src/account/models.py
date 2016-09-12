@@ -1,11 +1,21 @@
 from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
 from django.contrib.auth.signals import user_logged_in
+from django.contrib import messages
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils import timezone
 
-from billing.models import Membership
+from billing.models import Membership,UserMerchantID
+
+import braintree
+
+braintree.Configuration.configure(
+    braintree.Environment.Sandbox,
+    'q3m29r7tg2hj3fx3',
+    'n7frpfxd8453gtn2',
+    '15f9f94d97f31151598663137e05cfe1'
+)
 
 class MyUserManager(BaseUserManager):
     def create_user(self, email=None, username=None, password=None):
@@ -129,6 +139,23 @@ def profile_handler(sender,instance,created, **kwargs):
 
     if created:
         UserProfile.objects.create(user=instance)
+
+    try:
+        merchant_obj = UserMerchantID.objects.get(user=instance)
+    except:
+        #create a new braintree customer
+        new_customer_result = braintree.Customer.create({
+            "email": instance.email
+            })
+        #customer successed record customer id to UserMerchantID table
+        if new_customer_result.is_success:
+            merchant_customer_id = new_customer_result.customer.id
+            merchant_obj, created = UserMerchantID.objects.get_or_create(
+                user=instance,
+                customer_id=merchant_customer_id)
+            print """Customer created with id = {0}""".format(new_customer_result.customer.id)
+        else:
+            print """Error: {0}""".format(new_customer_result.message)
 
 
 

@@ -1,6 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.core.urlresolvers import reverse
+# from django.core.urlresolvers import reverse
 from django.shortcuts import render,HttpResponseRedirect,Http404,redirect
 
 import braintree
@@ -19,59 +19,83 @@ PLAN_ID = "monthly_plan"
 
 def upgrade(request):
     if request.user.is_authenticated():
-        # generate client token 
-        client_token = braintree.ClientToken.generate()
-        context = {'client_token':client_token}
 
+        # this part is test custome signal
         next_url = request.GET.get('next')
         member = request.POST.get('member')
         month = request.POST.get('month')
+        if member:
+            become_member.send(sender=request.user,
+                                month=str(month))
+            messages.success(request, 'Hoho, now you become our site member, enjoy.')
+            return HttpResponseRedirect(next_url)
+
         merchant_customer_id = None
 
         try:
+            #usermerchantid already created in userprofile post save handler
             merchant_obj = UserMerchantID.objects.get(user=request.user)
-        except UserMerchantID.DoesNotExist:
-            #create a new braintree customer
-            new_customer_result = braintree.Customer.create({})
-            #customer successed record customer id to UserMerchantID table
-            if new_customer_result.is_success:
-                merchant_customer_id = new_customer_result.customer.id
-                merchant_obj, created = UserMerchantID.objects.get_or_create(
-                    user=request.user,
-                    customer_id=merchant_customer_id)
-                print """Customer created with id = {0}""".format(new_customer_result.customer.id)
-            else:
-                print """Error: {0}""".format(new_customer_result.message)
-                messages.error(request, "There was an error with your account. Please contact us.")
         except:
-            messages.error(request, "There wan an error with the server. Please try again or contact us if problem persist.")
-            pass
-        # clicked pay button the request post  would send payment method nonce
-        # update customer payment method
-        # receive payment method token aka credit card token
+            messages.error(request, "There was an error with your account. Please contact us.")
+            return redirect('contact_us')
+
         merchant_customer_id = merchant_obj.customer_id
+        merchant_subscription_id = merchant_obj.subscription_id
+        merchant_plan_id = merchant_obj.plan_id
+
+        # receive a payment method nonce from client
+        # that means that server got customer's payment authorization
         nonce = request.POST.get('payment_method_nonce', None)
         if nonce is not None:
-
             payment_method_result = braintree.PaymentMethod.create({
                 "customer_id": merchant_customer_id,
                 "payment_method_nonce": nonce,
                 "options": {
                     "make_default": True }
                 })
+            if not payment_method_result.is_success:
+                messages.error(request, "An error occured: %s" % (payment_method_result.message))
+                return redirect('upgrade')
             the_token = payment_method_result.payment_method.token
 
-            subscription_result = braintree.Subscription.create({
-                "payment_method_token": the_token,
-                "plan_id":PLAN_ID,
-                })
+            # if subscription_id is not none then update subscription
+            if merchant_subscription_id is not None and merchant_plan_id is not None:
+                #make the subscription status is active
+                current_subscription_result = braintree.Subscription.find(merchant_subscription_id)
+                if current_subscription_result.status == "Active":
+                    #not finish yet
+                    subscription_result = braintree.Subscription.update(
+                        merchant_subscription_id,{
+                        "payment_method_token": the_token,
+                        })
+                    if subscription_result.is_success:
+                        messages.success(request, "You've renewed subscription successed, thanks!")
+                        return redirect('history')
+                #not active create an new subscription
+                else:
+                    subscription_result = braintree.Subscription.create({
+                        "payment_method_token": the_token,
+                        "plan_id":PLAN_ID,
+                        }) 
+                    new_sub = subscription_result.is_success                   
+            # else create an subscription
+            else:
 
-            if subscription_result.is_success:
+                subscription_result = braintree.Subscription.create({
+                    "payment_method_token": the_token,
+                    "plan_id":PLAN_ID,
+                    })
+                new_sub = subscription_result.is_success
+
+            if new_sub:
+                merchant_obj.subscription_id = subscription_result.subscription.id 
+                merchant_obj.plan_id = PLAN_ID
+                merchant_obj.save()
+
                 payment_type = subscription_result.subscription.transactions[0].payment_instrument_type
                 trans_id = subscription_result.subscription.transactions[0].id
-                sub_id = subscription_result.subscription.id
                 sub_amount = subscription_result.subscription.price
-
+                # create new trans base on payment type
                 if payment_type == braintree.PaymentInstrumentType.PayPalAccount:
                     newtrans = Transaction.objects.create_newtrans(
                     user=request.user,
@@ -92,7 +116,7 @@ def upgrade(request):
                     trans_success = newtrans.success
                 else:
                     trans_success = False
-
+                # create membership obj and send update signal
                 if trans_success:
                     membership_instance, created = Membership.objects.get_or_create(
                         user=request.user)
@@ -106,16 +130,14 @@ def upgrade(request):
                     messages.error(request, 'There was an error with your trans, please contact us.')
                     return redirect('upgrade')
             else:
-                error_ms = subscription_result.subscription.message
+                error_ms = subscription_result.message
                 messages.error(request, "An error occured: %s" % (error_ms))
                 return redirect('upgrade')
-
-
-        if member:
-            become_member.send(sender=request.user,
-                                month=str(month))
-            messages.success(request, 'Hoho, now you become our site member, enjoy.')
-            return HttpResponseRedirect(next_url)
+        # send a client token 
+        client_token = braintree.ClientToken.generate({
+            "customer_id": merchant_customer_id
+            })
+        context = {'client_token':client_token}
         return render(request, 'billing/upgrade.html', context)
     return Http404
 

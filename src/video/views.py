@@ -32,13 +32,15 @@ def video_detail(request,cat_slug,vid_slug):
                 'comments':comments,
                 'comment_form':comment_form,
                 })
+    
+        elif  obj.has_preview:
+            return render(request, 'video/video_detail.html', {'object':obj,})
+
         else:
             # upgrade to become a member
             next_url = obj.get_absolute_url()
             return HttpResponseRedirect('%s?next=%s' % (reverse('upgrade'),next_url))
     
-    elif obj.has_preview:
-        return render(request, 'video/video_detail.html', {'object':obj,})
 
     else:
         next_url = obj.get_absolute_url()
