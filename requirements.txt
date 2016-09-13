@@ -1,2 +1,15 @@
 Django==1.7.2
 wsgiref==0.1.2
+braintree==3.10.0
+Django==1.8.10
+django-crispy-forms==1.4.0
+django-mptt==0.8.6
+oauthlib==0.7.2
+Pillow==2.7.0
+PyJWT==0.4.1
+python-dateutil==2.5.3
+python-openid==2.2.5
+python-social-auth==0.2.1
+requests==2.5.1
+requests-oauthlib==0.4.2
+six==1.9.0
