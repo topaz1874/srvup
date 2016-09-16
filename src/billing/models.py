@@ -1,5 +1,5 @@
 import random
-
+from django.contrib.auth.signals import user_logged_in
 from django.conf import settings
 from django.db import models
 from django.dispatch import receiver
@@ -8,7 +8,7 @@ from django.utils import timezone
 from dateutil.relativedelta import relativedelta
 
 from .signals import become_member,membership_date_update
-
+from .utils import check_membership_status, update_braintree_memebership
 # Create your models here.
 class Membership(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL)
@@ -48,7 +48,10 @@ def membership_date_update_handler(sender, new_date_start, **kwargs):
     membership.save()
     membership.update_status()
 
-
+@receiver(user_logged_in)
+def logged_in_hander(sender, request, user, **kwargs):
+    update_braintree_memebership(user)
+    
 @receiver(models.signals.post_save, sender=Membership)
 def post_save_handler(sender, instance, created, **kwargs):
     if not created: 

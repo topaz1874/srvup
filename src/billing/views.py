@@ -74,7 +74,8 @@ def upgrade(request):
                     subscription_result = braintree.Subscription.update(merchant_subscription_id,{
                         "payment_method_token": the_token,
                         })
-                    did_update_sub = True
+                    if subscription_result.is_success:
+                        did_update_sub = True
                 # create an subscription
                 else:
                     subscription_result = braintree.Subscription.create({
@@ -85,7 +86,8 @@ def upgrade(request):
                         did_create_sub = True
 
                 if did_update_sub and not did_create_sub:
-                    messages.success(request, "You've renewed subscription successed, thanks!")
+                    messages.success(request, "You've changed your subscription payment successed, thanks!")
+                    # need to fixed if update had change membership time
                     return redirect('history')
                 elif did_create_sub and not did_update_sub:
                     merchant_obj.subscription_id = subscription_result.subscription.id 

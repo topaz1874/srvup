@@ -106,19 +106,6 @@ class MyUser(AbstractBaseUser):
         return self.is_admin
 
        
-#sender is the class of user
-@receiver(user_logged_in)
-def user_logged_in_handler(sender,request,signal,user, **kwargs):
-    request.session.set_expiry(60000)
-    # if there is a new user login then create membership obj
-    membership_obj, created = Membership.objects.get_or_create(user=user)
-    if created:
-        membership_obj.date_start = timezone.now()
-        membership_obj.save()
-        user.is_member = True
-        user.save()
-    user.membership.update_status()
-
 
 class UserProfile(models.Model):
     user = models.OneToOneField(MyUser)
@@ -139,6 +126,13 @@ def profile_handler(sender,instance,created, **kwargs):
 
     if created:
         UserProfile.objects.create(user=instance)
+        membership_obj, created = Membership.objects.get_or_create(user=instance)
+        if created:
+            membership_obj.date_start = timezone.now()
+            membership_obj.save()
+            instance.is_member = True
+            instance.save()
+        instance.membership.update_status()
 
     try:
         merchant_obj = UserMerchantID.objects.get(user=instance)
@@ -158,8 +152,7 @@ def profile_handler(sender,instance,created, **kwargs):
             print """Error: {0}""".format(new_customer_result.message)
 
 
-
-
+        
 
 
     
