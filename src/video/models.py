@@ -47,7 +47,7 @@ class Video(models.Model):
     category = models.ForeignKey("Category", null=True)
     timestamp = models.DateTimeField(auto_now_add=True, auto_now=False, null=True)
     updated = models.DateField(auto_now_add=False, auto_now=True, null=True)
-
+    likes = models.IntegerField(null=True, blank=True, default=0)
     objects = VideoManager()
 
     class Meta:

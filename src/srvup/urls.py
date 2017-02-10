@@ -12,6 +12,7 @@ urlpatterns = patterns('',
     url(r'^logout/$', 'account.views.auth_logout', name='logout'),
     url(r'^login/$', 'account.views.auth_login', name='login'),
 
+    url(r'^likes/$', 'video.views.like_video', name='like_video'),
     url(r'^projects/list/$',
         'video.views.category_list', name='category_list'),
     url(r'^projects/(?P<cat_slug>[-\w]+)/$',

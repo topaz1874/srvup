@@ -40,6 +40,17 @@ $('.reply_link').click(function(e){
 
 });
 
+$("#like").click(function(e) {
+    e.preventDefault();
+    $(this).fadeToggle(1000);
+    var vid ;
+    vid = $(this).attr("data-vid");
+    $.get('/likes/', {video_id: vid}, function(data){
+        console.log(data);
+        $("#like_count").html(data + " Likes");
+    })
+    
+});
 
 {% endblock %}
 </script>
@@ -53,30 +64,44 @@ $('.reply_link').click(function(e){
 </div>
 
 {% if object.tags.all %}
-<div class="col-sm-12">
-    <ul>
+<div class="col-sm-6">
+
+    <ul class="fa fa-tags" aria-hidden="true">
     {% for tag in object.tags.all %}
-    <li>{{ tag }}</li>
+    {{ tag }}
     {% endfor %}
     </ul>
 </div>
 {% endif %}
-<br/>
 
-<p>If you like this video share with your friends </p>
+<div class="col-sm-6">
+{% if object.get_next_vid %}
+<a href="{{object.get_next_vid}}"><button type="button" class="btn btn-primary">Next</button></a>
+{% endif %}
+{% if object.get_previous_vid %}
+<a href="{{object.get_previous_vid}}"><button type="button" class="btn btn-primary">Previous</button></a>
+{% endif %}
+</div>
+
+<br/>
+<div><p>If you like this video share with your friends </p>
 
 <a target="_blank" href="https://www.facebook.com/sharer/sharer.php?u={{ object.get_full_url }}"><i class="fa fa-facebook-square fa-3x"></i></a>
 
 <a target='_blank' href="https://twitter.com/home?status={{ object.get_share_message|safe }}">
 <i class="fa fa-twitter fa-3x" aria-hidden="true"></i>
 </a>
-{% if object.get_next_vid %}
-<a href="{{object.get_next_vid}}">Next</a>
-{% endif %}
-{% if object.get_previous_vid %}
-<a href="{{object.get_previous_vid}}">Previous</a>
-{% endif %}
+</div>
+
 <hr/>
+
+
+<div>
+    <strong id="like_count">{{object.likes}} Likes</strong>
+    {% if user.is_authenticated %}
+    <button id="like" data-vid="{{object.id}}" class="fa fa-thumbs-up" aria-hidden="true" type="button"></button>
+    {% endif %}
+</div>
 
   {% if comment_form  %}
 

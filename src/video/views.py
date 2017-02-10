@@ -1,9 +1,23 @@
-from django.shortcuts import render,HttpResponseRedirect,get_object_or_404
+from django.shortcuts import render,HttpResponseRedirect,get_object_or_404,HttpResponse
 from django.core.urlresolvers import reverse
-# from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required
 from .models import Video,Category
 from comment.forms import CommentForm
 from analytics.signals import page_view
+
+@login_required
+def like_video(request):
+    vid_id = None
+    if request.method == 'GET':
+        vid_id = request.GET['video_id']
+        likes = 0
+        if vid_id:
+            vid = Video.objects.get(id=int(vid_id))
+            likes = vid.likes + 1
+            vid.likes = likes
+            vid.save()
+    return HttpResponse(likes)
+
 
 # @login_required
 def video_detail(request,cat_slug,vid_slug):
