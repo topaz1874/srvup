@@ -45,8 +45,8 @@ $("#like").click(function(e) {
     $(this).fadeToggle(1000);
     var vid ;
     vid = $(this).attr("data-vid");
-    $.get('/likes/', {video_id: vid}, function(data){
-        console.log(data);
+    $.get('/ajax/likes/', {video_id: vid}, function(data){
+        // console.log(data);
         $("#like_count").html(data + " Likes");
     })
     
@@ -94,7 +94,6 @@ $("#like").click(function(e) {
 </div>
 
 <hr/>
-
 
 <div>
     <strong id="like_count">{{object.likes}} Likes</strong>

@@ -1,18 +1,21 @@
 from django.shortcuts import render,HttpResponseRedirect,get_object_or_404,HttpResponse
 from django.core.urlresolvers import reverse
 from django.contrib.auth.decorators import login_required
-from .models import Video,Category
+from .models import Video,Category,VoteUser
 from comment.forms import CommentForm
 from analytics.signals import page_view
 
 @login_required
-def like_video(request):
+def ajax_like_video(request):
     vid_id = None
+    user = request.user
     if request.method == 'GET':
         vid_id = request.GET['video_id']
         likes = 0
         if vid_id:
             vid = Video.objects.get(id=int(vid_id))
+            vote = VoteUser(content_object=vid, voteuser=user)
+            vote.save()
             likes = vid.likes + 1
             vid.likes = likes
             vid.save()
@@ -28,7 +31,7 @@ def video_detail(request,cat_slug,vid_slug):
     """
     cat = get_object_or_404(Category, slug=cat_slug)
     obj = get_object_or_404(Video, category=cat, slug=vid_slug)
-    
+    print obj.voteuser.all()  
     page_view.send(
         sender = request.user,
         path = request.get_full_path(),

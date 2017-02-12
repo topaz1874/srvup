@@ -47,7 +47,10 @@ class Video(models.Model):
     category = models.ForeignKey("Category", null=True)
     timestamp = models.DateTimeField(auto_now_add=True, auto_now=False, null=True)
     updated = models.DateField(auto_now_add=False, auto_now=True, null=True)
-    likes = models.IntegerField(null=True, blank=True, default=0)
+    likes = models.IntegerField(null=True, blank=True)
+    voteuser = GenericRelation("VoteUser", null=True, blank=True)    
+
+
     objects = VideoManager()
 
     class Meta:
@@ -176,6 +179,12 @@ class TaggedItem(models.Model):
     def __unicode__(self):
         return self.tag
 
+class VoteUser(models.Model):
+    voteuser = models.CharField(max_length=256)
+    content_type = models.ForeignKey(ContentType)
+    object_id = models.PositiveIntegerField()
+    content_object = GenericForeignKey()
 
-
+    def __unicode__(self):
+        return self.voteuser
 
