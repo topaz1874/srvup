@@ -29,9 +29,11 @@ def video_detail(request,cat_slug,vid_slug):
     or has free preivew property otherwise redirect to login
     page
     """
+    voted = False
     cat = get_object_or_404(Category, slug=cat_slug)
     obj = get_object_or_404(Video, category=cat, slug=vid_slug)
-    print obj.voteuser.all()  
+    if obj.voteuser.filter(voteuser=request.user):
+        voted = True
     page_view.send(
         sender = request.user,
         path = request.get_full_path(),
@@ -45,6 +47,7 @@ def video_detail(request,cat_slug,vid_slug):
             comments = obj.comment_set.all()
             comment_form = CommentForm(request.POST or None)
             return render(request, 'video/video_detail.html', {
+                'voted':voted,
                 'object':obj,
                 'comments':comments,
                 'comment_form':comment_form,

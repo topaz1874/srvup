@@ -28,8 +28,9 @@ def home(request):
             .annotate(the_count=Count("primary_object_id"))\
             .order_by('-the_count')[:6]
         popular_videos = []
-        for i in popular_videos_ids:
-            popular_videos.append(Video.objects.get(id=i[0]))
+        if popular_videos:
+            for i in popular_videos_ids:
+                popular_videos.append(Video.objects.get(id=i[0]))
 
         for vid in recent_videos:
             obj =  vid.primary_content_object

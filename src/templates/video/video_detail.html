@@ -94,10 +94,9 @@ $("#like").click(function(e) {
 </div>
 
 <hr/>
-
 <div>
     <strong id="like_count">{{object.likes}} Likes</strong>
-    {% if user.is_authenticated %}
+    {% if user.is_authenticated and not voted %}
     <button id="like" data-vid="{{object.id}}" class="fa fa-thumbs-up" aria-hidden="true" type="button"></button>
     {% endif %}
 </div>

@@ -188,3 +188,6 @@ class VoteUser(models.Model):
     def __unicode__(self):
         return self.voteuser
 
+    class Meta:
+        unique_together = ('voteuser', 'content_type', 'object_id')
+
