@@ -13,6 +13,7 @@ urlpatterns = patterns('',
     url(r'^login/$', 'account.views.auth_login', name='login'),
 
     url(r'^ajax/likes/$', 'video.views.ajax_like_video', name='ajax_like_video'),
+    url(r'^ajax/validate_username/$','srvup.views.ajax_validate_username', name='ajax_validate_username'),
     
 
     url(r'^projects/list/$',

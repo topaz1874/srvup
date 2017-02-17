@@ -1,4 +1,5 @@
 from django import forms
+from django.forms import widgets
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
 from django.contrib.auth import authenticate,login,logout
 
@@ -61,6 +62,63 @@ class LoginForm(forms.Form):
     username = forms.CharField(label='Username')
     password = forms.CharField(widget=forms.PasswordInput())
 
-    
+from crispy_forms.helper import FormHelper
+from crispy_forms.layout import Submit
+class RegisterForm(forms.Form):
+    username = forms.CharField(
+        label='Username',
+        required=True,
+        widget=forms.TextInput(attrs={'id': 'registerUsername'})
+        )
 
+    email = forms.EmailField(
+        required=True,)
+
+    password1 = forms.CharField(
+        label='Set your password',
+        widget=forms.PasswordInput,
+        required=True)
+
+    password2 = forms.CharField(
+        label='Enter your password again',
+        widget=forms.PasswordInput,
+        required=True)
+
+    def __init__(self, *args, **kwargs):
+        super(RegisterForm, self).__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_id = 'registerForm'
+        self.helper.form_method = 'post'
+        self.helper.form_action = 'register'
+
+        self.helper.add_input(Submit('submit', 'Register'))
+
+        # self.fields['username'].widget = widgets.TextInput(attrs={
+        #     'id': 'registerUsername'
+        # })
+
+    
+    def clean_password2(self):
+        # Check that the two password entries match
+        password1 = self.cleaned_data.get("password1")
+        password2 = self.cleaned_data.get("password2")
+        if password1 and password2 and password1 != password2:
+            raise forms.ValidationError("Passwords don't match")
+        return password2
+
+    def clean_username(self):
+        username = self.cleaned_data['username']
+        try:
+            MyUser.objects.get(username=username)
+            raise forms.ValidationError('This username has already been used')
+        except Exception:
+            return username
+
+    def save(self, commit=True):
+        # Save the provided password in hashed format
+        user = super(UserCreationForm, self).save(commit=False)
+        user.set_password(self.cleaned_data["password1"])
+        if commit:
+            user.save()
+        return user
     

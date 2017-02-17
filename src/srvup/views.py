@@ -3,13 +3,24 @@ from django.shortcuts import render,redirect
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count
+from django.http import JsonResponse
 
-from account.forms import UserCreationForm, LoginForm
+from account.forms import UserCreationForm, LoginForm, RegisterForm
 from analytics.signals import page_view
 from comment.models import Comment
 from video.models import Video
+from account.models import MyUser
 # @login_required(login_url='/enroll/login')
 # @login_required
+
+def ajax_validate_username(request):
+    username = request.GET.get('username', None)
+    data = {
+        "is_taken": MyUser.objects.filter(username__iexact=username).exists()
+    }
+    if data['is_taken']:
+        data['err_msg'] = 'A user with this username already exists.'
+    return JsonResponse(data)
 
 def home(request):
     if request.user.is_authenticated():
@@ -46,7 +57,9 @@ def home(request):
         }
         return render(request, 'home_logged_in.html',context)
     else:
-        register_form = UserCreationForm()
+        # register_form = UserCreationForm()
+        register_form = RegisterForm()
+        #todo use cripsy tags with ajax validation
         login_form = LoginForm()
         context = {
         'register_form': register_form,

@@ -1,6 +1,34 @@
 {% extends "base.html" %}
 {% load crispy_forms_tags %}
+<script type="text/javascript">
+{% block jquery %}
+$("#registerUsername[type='text']").change(function () {
+  // console.log( $(this).val() );
+  var username = $(this).val();
+  // $.ajax({
+  //   url: '/ajax/validate_username',
+  //   type: 'GET',
+  //   dataType: 'json',
+  //   data: {username: 'username'},
+  // })
+  // .done(function() {
+  //   console.log("success");
+  // })
+  // .fail(function() {
+  //   console.log("error");
+  // })
+  $.get('/ajax/validate_username',{username: username },function(data) {
+    console.log(data);
+    if (data.is_taken){
+      alert(data.err_msg);
+    }
+  });
+  
+});
 
+
+{% endblock %}
+</script>
 {% block title %}Welcome | {% endblock %}
 
 
@@ -26,12 +54,7 @@
                 <div role="tabpanel" class="tab-pane active" id="register">  
                 <div class="panel panel-default">
                 <div class="panel-body">
-                    <form method="post" action="{% url 'register' %}">
-                        {% csrf_token %}
-                        {{ register_form | crispy }}
-                        <input class="btn btn-default btn-block btn-lg" type="submit" value="Register">
-                    </form>
-
+                        {% crispy register_form %}
                 </div>
                 </div></div>
                 <div role="tabpanel" class="tab-pane" id="Login">

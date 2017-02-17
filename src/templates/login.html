@@ -1,5 +1,13 @@
 {% extends "base.html" %}
+<script type="text/javascript">
+{% block jquery %}
+$("#id_username").change(function () {
+  console.log( $(this).val() );
+});
 
+
+{% endblock %}
+</script>
 {% block content %}
 
 <div class="col-sm-6 col-sm-offset-3">

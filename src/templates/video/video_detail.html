@@ -43,12 +43,27 @@ $('.reply_link').click(function(e){
 $("#like").click(function(e) {
     e.preventDefault();
     $(this).fadeToggle(1000);
-    var vid ;
+    var vid;
     vid = $(this).attr("data-vid");
-    $.get('/ajax/likes/', {video_id: vid}, function(data){
-        // console.log(data);
-        $("#like_count").html(data + " Likes");
+    $.ajax({
+        url: '/ajax/likes/',
+        type: 'GET',
+        dataType: 'html',
+        data: {video_id: vid},//data send
     })
+    .success(function(data) {
+         $("#like_count").html(data + " Likes");
+    })
+    .fail(function() {
+        console.log("error");
+    });
+    
+    // var vid ;
+    // vid = $(this).attr("data-vid");
+    // $.get('/ajax/likes/', {video_id: vid}, function(data){
+    //     // console.log(data);
+    //     $("#like_count").html(data + " Likes");
+    // })
     
 });
 
