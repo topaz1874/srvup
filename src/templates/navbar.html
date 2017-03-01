@@ -23,8 +23,13 @@
               <a href="#" class="dropdown-toggle notification-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><span class="glyphicon glyphicon-inbox" aria-hidden="true"></span><span class="caret"></span></a>
               <ul class="dropdown-menu" id="notification-dropdown" role="menu">
               </ul>
-            </li>           
-            <li><a href="{% url 'logout' %}">{{ user }} | Logout</a></li>
+            </li>
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle"  id="dropdownUser" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{{ user }} <span class="caret"></span></a>
+              <ul class="dropdown-menu">
+                <li><a href="{% url 'logout' %}">Logout</a></li>
+              </ul>
+            </li>          
             {% else %}
               {% if request.get_full_path == "/" %}
               {% else %}

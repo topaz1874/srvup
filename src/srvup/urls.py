@@ -18,6 +18,8 @@ urlpatterns = patterns('',
 
     url(r'^projects/list/$',
         'video.views.category_list', name='category_list'),
+    url(r'^projects/create/$',
+        'video.views.video_create',name='video_create'),
     url(r'^projects/(?P<cat_slug>[-\w]+)/$',
         'video.views.category_detail', name='category_detail'),
     url(r'^projects/(?P<cat_slug>[-\w]+)/(?P<vid_slug>[-\w]+)/$',

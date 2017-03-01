@@ -2,6 +2,7 @@ from django.shortcuts import render,HttpResponseRedirect,get_object_or_404,HttpR
 from django.core.urlresolvers import reverse
 from django.contrib.auth.decorators import login_required
 from .models import Video,Category,VoteUser
+from .forms import VidForm
 from comment.forms import CommentForm
 from analytics.signals import page_view
 
@@ -20,6 +21,27 @@ def ajax_like_video(request):
             vid.likes = likes
             vid.save()
     return HttpResponse(likes)
+
+@login_required
+def video_create(request):
+    form = VidForm(request.POST or None)
+    if form.is_valid():
+        if 'submit' in request.POST:
+            newvid = form.save(commit=False)
+            newvid.likes = 0
+            newvid.save()
+            return HttpResponseRedirect(reverse('video_detail', kwargs={
+                'cat_slug': newvid.category.slug,
+                'vid_slug': newvid.slug}))
+    elif 'cancel' in request.POST:
+        print 'cancel'
+        return HttpResponseRedirect('/')
+
+    else:
+        return render(request, 'video/vid_forms.html',
+            {'form': form})
+
+
 
 
 # @login_required
